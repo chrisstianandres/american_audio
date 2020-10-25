@@ -1,0 +1,162 @@
+{% extends 'front-end/base.html' %}
+{% load static %}
+{% block head %}
+    {% block form_head %}
+        <!-- Latest compiled and minified CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet"/>
+        <link rel="stylesheet" href="{% static 'lib/bootstrap-touchspin-4.3.0/jquery.bootstrap-touchspin.css' %}"/>
+    {% endblock %}
+{% endblock %}
+{% block content %}
+    <input type="hidden" id="action" name="action" value="{{ action }}">
+    <input type="hidden" name="crud" value="{{ crud }}">
+    <input type="hidden" name="key" value="{{ key }}">
+    <div class="card">
+        <div class="card-header">
+            <h4> &nbsp;<i class="{{ icono }}"></i> {{ titulo }}</h4>
+        </div>
+        <div class="card-body">
+            <div class="container col-lg-12">
+                <div class="row">
+                    <div class="col-lg-8 col-md-12">
+                        <div class="card">
+                            <div class="card-header" >
+                                <ul class="nav nav-tabs nav-justified" id="myTab" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="prod-tab" data-toggle="tab" href="#prod"
+                                           style="color: black">
+                                            <i class="fab fa-amazon"></i>
+                                            &nbsp;<strong>Productos</strong></a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="serivces-tab" data-toggle="tab" href="#services"
+                                           role="tab" aria-controls="services" aria-selected="false" style="color: black"> <i
+                                                class="fas fa-concierge-bell"></i>&nbsp;Servicios</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="card-body">
+                                <div class="tab-content" id="myTabContent" role="tablist">
+                                    <div class="tab-pane fade show active" role="tabpanel" aria-labelledby="prod-tab"
+                                         id="prod">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5><i class="fab fa-amazon"></i> Detalle de Productos</h5>
+                                            </div>
+                                            <div class="card-body">
+
+                                                <div class="form-group">
+                                                    <label> Buscar Productos:</label>
+                                                    {{ form2.producto }}
+                                                </div>
+                                                <br>
+                                                <button type="button"
+                                                        class="btn btn-danger btn-sm btn-flat btnRemoveall">
+                                                    <i class="far fa-trash-alt"></i> Eliminar todos los Productos
+                                                </button>
+                                                <br><br>
+                                                <div class="table-responsive">
+                                                    <table class="table" id="tblproductos">
+                                                        <thead>
+                                                        <tr>
+                                                            <th><em class="fas fa-trash-alt"></em></th>
+                                                            <th>Producto</th>
+                                                            <th>Catg</th>
+                                                            <th>Prest</th>
+                                                            <th>Stock</th>
+                                                            <th>Cant</th>
+                                                            <th>Pvp</th>
+                                                            <th>Subtotal</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" role="tabpanel" aria-labelledby="services-tab"
+                                         id="services">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h5><i class="fas fa-concierge-bell"></i> Detalle de Servicios</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="form-group">
+                                                    <label> Buscar Servicios:</label>
+                                                    {{ form3.producto }}
+                                                </div>
+                                                <br>
+                                                <button type="button"
+                                                        class="btn btn-danger btn-sm btn-flat btnRemoveall">
+                                                    <i class="far fa-trash-alt"></i> Eliminar todos los Servicios
+                                                </button>
+                                                <br><br>
+                                                <div class="table-responsive">
+                                                    <table class="table" id="tblservicios">
+                                                        <thead>
+                                                        <tr>
+                                                            <th><em class="fas fa-trash-alt"></em></th>
+                                                            <th>Servicio</th>
+                                                            <th>Cant</th>
+                                                            <th>Pvp</th>
+                                                            <th>Subtotal</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>&nbsp;<i class="fa fa-book-open"></i> Datos de la Venta</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    {{ form.as_p }}
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <br><br><br><br>
+                    <div class="col-lg-12">
+                        <button type="submit" class="btn btn-primary btn-sm btn-flat" id="save">
+                            <i class="far fa-save"></i> {{ boton }}
+                            <span class="ripple ripple-animate"
+                                  style="height: 115px; width: 115px; animation-duration: 0.7s; animation-timing-function: linear; background: rgb(255, 255, 255); opacity: 0.4; top: -47.875px; left: -23.5px;"></span>
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm btn-flat"
+                                onclick="window.history.back();">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+{% block script %}
+    <!-- Latest compiled and minified JavaScript -->
+
+    <script src="{% static 'apps/venta/venta.js' %}"></script>
+    <script src="{% static 'apps/funtions.js' %}"></script>
+    <script>
+        {#ventas.items.productos = {{ detalle|safe }};#}
+        ventas.list();
+    </script>
+{% endblock %}

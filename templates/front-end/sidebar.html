@@ -1,0 +1,64 @@
+{% load static %}
+<div id="layoutSidenav_nav">
+    <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+        <div class="sb-sidenav-menu">
+            <div class="nav">
+                <div class="sb-sidenav-menu-heading">Navegacion</div>
+                <a class="nav-link" href="{% url 'menu' %}">
+                    <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    Menu Principal
+                </a>
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseLayouts"
+                   aria-expanded="false" aria-controls="collapseLayouts">
+                    <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
+                    Transacciones
+                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                </a>
+                <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-parent="#sidenavAccordion">
+                    <nav class="sb-sidenav-menu-nested nav">
+                        <a class="nav-link" href="{% url 'venta:lista' %}"><i class="fa fa-shopping-cart"></i> &nbsp;Ventas</a>
+                        <a class="nav-link" href="{% url 'compra:lista' %}"><i class="fas fa-dollar-sign"></i> &nbsp;Compras</a>
+                    </nav>
+                </div>
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
+                   aria-expanded="false" aria-controls="collapsePages">
+                    <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                    Recursos Humanos
+                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                </a>
+               <div class="collapse" id="collapsePages" aria-labelledby="headingOne" data-parent="#sidenavAccordion">
+                    <nav class="sb-sidenav-menu-nested nav">
+                        <a class="nav-link" href="{% url 'empleado:lista' %}"><i class="fa fa-male"></i> &nbsp;Empleados</a>
+                        <a class="nav-link" href="{% url 'cargo:lista' %}"><i class="fas fa-laptop-house"></i> &nbsp;Cargos</a>
+                    </nav>
+                </div>
+
+
+
+
+
+
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsecomercial"
+                   aria-expanded="false" aria-controls="collapsecomercial">
+                    <div class="sb-nav-link-icon"><i class="fab fa-amazon-pay"></i></div>
+                    Comercial
+                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                </a>
+               <div class="collapse" id="collapsecomercial" aria-labelledby="headingOne" data-parent="#sidenavAccordion">
+                    <nav class="sb-sidenav-menu-nested nav">
+                        <a class="nav-link" href="{% url 'cliente:lista' %}"><i class="fas fa-users"></i> &nbsp;Clientes</a>
+                        <a class="nav-link" href="{% url 'proveedor:lista' %}"><i class="fa fa-truck"></i> &nbsp;Proveedor</a>
+                        <a class="nav-link" href="{% url 'producto:lista' %}"><i class="fab fa-amazon"></i> &nbsp;Producto</a>
+                        <a class="nav-link" href="{% url 'producto:lista' %}"><i class="fas fa-concierge-bell"></i> &nbsp;Servicio</a>
+                        <a class="nav-link" href="{% url 'categoria:lista' %}"><i class="fa fa-boxes"></i> &nbsp;Categoria</a>
+                        <a class="nav-link" href="{% url 'presentacion:lista' %}"><i class="fab fa-untappd"></i> &nbsp;Presentacion</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="sb-sidenav-footer">
+            <div class="small">Bienvenido:</div>
+            {{ request.user.get_full_name }} <a href="#"><i class="far fa-play-circle text-success"></i> En Linea</a>
+        </div>
+    </nav>
+</div>

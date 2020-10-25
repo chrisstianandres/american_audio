@@ -1,0 +1,20 @@
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <a class="navbar-brand" href="{% url 'menu' %}">{{ empresa.nombre }}&nbsp; <i class="fas fa-headphones-alt"></i></a>
+    <button class="btn btn-link btn-sm order-1 order-lg-0" id="sidebarToggle" href="#"><i class="fas fa-bars"></i>
+    </button>
+    <!-- Navbar-->
+    <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="userDropdown" href="#" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                    <a class="dropdown-item" href="{% url 'empresa:editar' %}"><i class="fas fa-tools"></i>&nbsp;&nbsp;Configuracion </a>
+                    <a class="dropdown-item" href="{% url 'empleado:profile' %}"><i class="fas fa-id-card-alt"></i>&nbsp;&nbsp;Perfil </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i>&nbsp;&nbsp;Salir  </a>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
