@@ -5,6 +5,7 @@ from django.forms import model_to_dict
 from apps.cliente.models import Cliente
 from apps.empleado.models import Empleado
 from apps.producto.models import Producto
+from apps.servicio.models import Servicio
 
 estado = (
     (0, 'DEVUELTA'),
@@ -43,11 +44,13 @@ class Venta(models.Model):
 class Detalle_venta(models.Model):
     venta = models.ForeignKey(Venta, on_delete=models.PROTECT)
     producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
-    cantidad = models.IntegerField(default=1)
+    cantidadp = models.IntegerField(default=0)
+    servicio = models.ForeignKey(Servicio, on_delete=models.PROTECT, null=True, blank=True)
+    cantidads = models.IntegerField(default=0)
     subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
 
     def __str__(self):
-        return '%s %s' % (self.venta, self.producto.nombre)
+        return '%s %s %s' % (self.venta, self.producto.nombre, self.servicio.nombre)
 
     def toJSON(self):
         item = model_to_dict(self)

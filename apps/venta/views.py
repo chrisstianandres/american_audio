@@ -11,8 +11,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import *
 
 from apps.backEnd import nombre_empresa
+from apps.cliente.forms import ClienteForm
 from apps.compra.models import Compra
-from apps.venta.forms import VentaForm, Detalle_VentaForm, Detalle_VentaForm_serv
+from apps.servicio.models import Servicio
+from apps.venta.forms import VentaForm, Detalle_VentaForm
 from apps.venta.models import Venta, Detalle_venta
 from apps.empresa.models import Empresa
 from apps.producto.models import Producto
@@ -84,14 +86,15 @@ def data(request):
 
 def nuevo(request):
     data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'crud': '../venta/get_producto', 'empresa' : empresa,
+        'icono': opc_icono, 'entidad': opc_entidad, 'crud': '../venta/get_producto', 'crudserv': '../venta/get_servicio',
+        'empresa' : empresa,
         'boton': 'Guardar Venta', 'action': 'add', 'titulo': 'Nuevo Registro de una Venta',
         'key': ''
     }
     if request.method == 'GET':
         data['form'] = VentaForm()
         data['form2'] = Detalle_VentaForm()
-        data['form3'] = Detalle_VentaForm_serv()
+        data['formc'] = ClienteForm()
         data['detalle'] = []
     return render(request, 'front-end/venta/venta_form.html', data)
 
@@ -207,6 +210,27 @@ def get_producto(request):
         data['error'] = 'Ha ocurrido un error'
     return JsonResponse(data, safe=False)
 
+@csrf_exempt
+def get_servicio(request):
+    data = {}
+    try:
+        id = request.POST['id']
+        if id:
+            servicio = Servicio.objects.filter(pk=id)
+            iva_emp = Empresa.objects.get(pk=1)
+            data = []
+            for i in servicio:
+                item = i.toJSON()
+                item['cantidad'] = 1
+                item['subtotal'] = 0.00
+                item['iva_emp'] = iva_emp.iva
+                data.append(item)
+        else:
+            data['error'] = 'No ha selecionado ningun Servicio'
+    except Exception as e:
+        data['error'] = 'Ha ocurrido un error'
+    return JsonResponse(data, safe=False)
+
 
 @csrf_exempt
 def get_detalle(request):
@@ -215,7 +239,6 @@ def get_detalle(request):
         id = request.POST['id']
         if id:
             data = []
-
             for p in Detalle_venta.objects.filter(venta_id=id):
                 data.append(p.toJSON())
         else:

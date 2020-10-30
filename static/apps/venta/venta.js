@@ -1,4 +1,5 @@
 var tblventa;
+var tblservicios;
 var ventas = {
     items: {
         fecha_venta: '',
@@ -8,11 +9,17 @@ var ventas = {
         iva_emp: 0.00,
         total: 0.00,
         productos: [],
+        servicios: [],
     },
     calculate: function () {
         var subtotal = 0.00;
         var iva_emp = 0.00;
         $.each(this.items.productos, function (pos, dict) {
+            dict.subtotal = dict.cantidad * parseFloat(dict.pvp);
+            subtotal += dict.subtotal;
+            iva_emp = dict.iva_emp;
+        });
+        $.each(this.items.servicios, function (pos, dict) {
             dict.subtotal = dict.cantidad * parseFloat(dict.pvp);
             subtotal += dict.subtotal;
             iva_emp = dict.iva_emp;
@@ -85,9 +92,70 @@ var ventas = {
                 });
             }
         });
-    }
+    },
+    addserv: function (data) {
+        this.items.servicios.push(data);
+        this.listserv();
+    },
+    listserv: function () {
+        this.calculate();
+        tblservicios = $("#tblservicios").DataTable({
+            destroy: true,
+            autoWidth: false,
+            dataSrc: "",
+            scrollX: true,
+            language: {
+                "url": '//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json'
+            },
+            data: this.items.servicios,
+            columns: [
+                {data: 'id'},
+                {data: "nombre"},
+                {data: "cantidad"},
+                {data: "pvp"},
+                {data: "subtotal"}
+            ],
+            columnDefs: [
+                {
+                    targets: [0],
+                    class: 'text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return '<a rel="remove" type="button" class="btn btn-danger btn-sm btn-flat" style="color: white" data-toggle="tooltip" title="Eliminar Servicio"><i class="fa fa-trash-alt"></i></a>';
+                        //return '<a rel="remove" class="btn btn-danger btn-sm btn-flat"><i class="fas fa-trash-alt"></i></a>';
+
+                    }
+                },
+                {
+                    targets: [-1, -2],
+                    class: 'text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return '$' + parseFloat(data).toFixed(2);
+                    }
+                },
+                {
+                    targets: [-3],
+                    class: 'text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return '<input type="text" name="cantidad" class="form-control form-control-sm input-sm" autocomplete="off" value="' + data + '">';
+
+                    }
+                }],
+            rowCallback: function (row, data) {
+                $(row).find('input[name="cantidad"]').TouchSpin({
+                    min: 1,
+                    max: 100000,
+                    step: 1
+                });
+            }
+        });
+    },
+
 };
 $(function () {
+
     //texto de los selects
     $('.select2').select2({
         "language": {
@@ -97,6 +165,7 @@ $(function () {
         },
         allowClear: true
     });
+
     //seleccionar producto del select producto
     $('#id_producto').on('select2:select', function (e) {
         var crud = $('input[name="crud"]').val();
@@ -110,6 +179,25 @@ $(function () {
             success: function (data) {
                 ventas.add(data['0']);
                 $('#id_producto option:selected').remove();
+            },
+            error: function (xhr, status, data) {
+                alert(data['0']);
+            },
+
+        })
+    });
+    $('#id_servicio').on('select2:select', function (e) {
+        var crudserv = $('input[name="crudserv"]').val();
+        $.ajax({
+            type: "POST",
+            url: crudserv,
+            data: {
+                "id": $('#id_servicio option:selected').val(),
+            },
+            dataType: 'json',
+            success: function (data) {
+                ventas.addserv(data['0']);
+                $('#id_servicio option:selected').remove();
             },
             error: function (xhr, status, data) {
                 alert(data['0']);
@@ -131,14 +219,13 @@ $(function () {
                     ventas.list();
                 });
             })
-    })
-        .on('change keyup', 'input[name="cantidad"]', function () {
-            var cantidad = parseInt($(this).val());
-            var tr = tblventa.cell($(this).closest('td, li')).index();
-            ventas.items.productos[tr.row].cantidad = cantidad;
-            ventas.calculate();
-            $('td:eq(7)', tblventa.row(tr.row).node()).html('$' + ventas.items.productos[tr.row].subtotal.toFixed(2));
-        });
+    }).on('change keyup', 'input[name="cantidad"]', function () {
+        var cantidad = parseInt($(this).val());
+        var tr = tblventa.cell($(this).closest('td, li')).index();
+        ventas.items.productos[tr.row].cantidad = cantidad;
+        ventas.calculate();
+        $('td:eq(7)', tblventa.row(tr.row).node()).html('$' + ventas.items.productos[tr.row].subtotal.toFixed(2));
+    });
     $('.btnRemoveall').on('click', function () {
         if (ventas.items.productos.length === 0) return false;
         borrar_todo_alert('Alerta de Eliminación',
@@ -150,6 +237,27 @@ $(function () {
             });
     });
 
+
+    $('#tblservicios tbody').on('click', 'a[rel="remove"]', function () {
+        var tr = tblservicios.cell($(this).closest('td, li')).index();
+        borrar_todo_alert('Alerta de Eliminación',
+            'Esta seguro que desea eliminar este servicio de tu detalle?', function () {
+                var p = ventas.items.servicios[tr.row];
+                ventas.items.servicios.splice(tr.row, 1);
+                $('#id_servicio').append('<option value="' + p.id + '">' + p.nombre + '</option>');
+                // $('#id_producto').selectpicker('refresh');
+
+                menssaje_ok('Confirmacion!', 'Servicio eliminado', 'far fa-smile-wink', function () {
+                    ventas.listserv();
+                });
+            })
+    }).on('change keyup', 'input[name="cantidad"]', function () {
+        var cantidad = parseInt($(this).val());
+        var tr = tblservicios.cell($(this).closest('td, li')).index();
+        ventas.items.servicios[tr.row].cantidad = cantidad;
+        ventas.calculate();
+        $('td:eq(4)', tblservicios.row(tr.row).node()).html('$' + ventas.items.servicios[tr.row].subtotal.toFixed(2));
+    });
     $('#save').on('click', function () {
         if ($('select[name="cliente"]').val() === "") {
             menssaje_error('Error!', "Debe seleccionar un cliente", 'far fa-times-circle');
@@ -178,5 +286,42 @@ $(function () {
             });
 
     });
+    $('#id_new_client').on('click', function () {
+        $('#Modal').modal('show');
+    });
+    $('form').on('submit', function (e) {
+        e.preventDefault();
+        var parametros = $(this).serialize();
+        var isvalid = $("#form").valid();
+        if (isvalid) {
+            console.log(parametros);
+            save_with_ajax('Alerta',
+                '/cliente/crearcli', 'Esta seguro que desea guardar este cliente?', parametros,
+                function () {
+                    menssaje_ok('Exito!', 'Exito al guardar este cliente!', 'far fa-smile-wink', function () {
+                        $('#Modal').modal('hide');
+                        $.ajax({
+                            dataType: 'JSON',
+                            type: 'POST',
+                            url: '/cliente/data',
+                        }).done(function (data) {
+                            $("#id_cliente").select2("destroy");
+                            $("#id_cliente").select2("val", "");
+                            $.each(data, function (key, value) {
+                                $('#id_cliente').append('<option value="' + value.id + '">' + value.nombres + value.apellidos+'</option>');
+
+                            });
+
+                        });
+
+                    });
+                });
+        }
+
+    });
+
+
 });
+
+//$('#id_producto').append('<option value="' + p.id + '">' + p.nombre + '</option>');
 

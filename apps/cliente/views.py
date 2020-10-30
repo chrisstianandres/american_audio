@@ -12,6 +12,7 @@ from django.db.models import Q
 
 from apps.empleado.models import Empleado
 from apps.proveedor.models import Proveedor
+import goslate
 
 opc_icono = 'fa fa-user'
 opc_entidad = 'Clientes'
@@ -21,7 +22,7 @@ empresa = nombre_empresa()
 
 def cliente_lista(request):
     data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'empresa' : empresa,
+        'icono': opc_icono, 'entidad': opc_entidad, 'empresa': empresa,
         'boton': 'Nuevo Cliente', 'titulo': 'Listado de Clientes',
         'nuevo': '/cliente/nuevo'
     }
@@ -30,9 +31,22 @@ def cliente_lista(request):
     return render(request, "front-end/cliente/cliente_list.html", data)
 
 
+@csrf_exempt
+def data(request):
+    data = {}
+    try:
+        query = Cliente.objects.all()
+        data = []
+        for a in query:
+            data.append(a.toJSON())
+    except Exception as e:
+        data['error'] = str(e)
+    return JsonResponse(data, safe=False)
+
+
 def nuevo(request):
     data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa' : empresa,
+        'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa': empresa,
         'boton': 'Guardar Cliente', 'action': 'add', 'titulo': 'Nuevo Registro de un Cliente',
     }
     if request.method == 'GET':
@@ -43,7 +57,7 @@ def nuevo(request):
 def crear(request):
     f = ClienteForm(request.POST)
     data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa' : empresa,
+        'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa': empresa,
         'boton': 'Guardar Cliente', 'action': 'add', 'titulo': 'Nuevo Registro de un Cliente'
     }
     action = request.POST['action']
@@ -70,11 +84,40 @@ def crear(request):
             return render(request, 'front-end/cliente/cliente_form.html', data)
 
 
+@csrf_exempt
+def crearcli(request):
+    data = {}
+    try:
+        if request.method == 'POST':
+            if Proveedor.objects.filter(documento=0, numero_documento=request.POST['cedula']):
+                data['error'] = 'Numero de Cedula ya exitente en los Proveedores'
+            elif Empleado.objects.filter(cedula=request.POST['cedula']):
+                data['error'] = 'Numero de Cedula ya exitente en los Empleados'
+            elif verificar(request.POST['cedula']):
+                c = Cliente()
+                c.nombres = request.POST['nombres']
+                c.apellidos = request.POST['apellidos']
+                c.cedula = request.POST['cedula']
+                c.correo = request.POST['correo']
+                c.sexo = request.POST['sexo']
+                c.telefono = request.POST['telefono']
+                c.d = request.POST['direccion']
+                c.save()
+                data['resp'] = True
+                return JsonResponse(data)
+            else:
+                data['error'] = 'Numero de Cedula no valido para Ecuador'
+    except Exception as e:
+        gs = goslate.Goslate()
+        data['error'] = gs.translate(str(e), 'es')
+    return JsonResponse(data)
+
+
 def editar(request, id):
     cargo = Cliente.objects.get(id=id)
     crud = '/cliente/editar/' + str(id)
     data = {
-        'icono': opc_icono, 'crud': crud, 'entidad': opc_entidad, 'empresa' : empresa,
+        'icono': opc_icono, 'crud': crud, 'entidad': opc_entidad, 'empresa': empresa,
         'boton': 'Guardar Edicion', 'titulo': 'Editar Registro de un Cliente',
         'option': 'editar'
     }
