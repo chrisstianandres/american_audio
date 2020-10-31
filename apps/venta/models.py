@@ -43,11 +43,12 @@ class Venta(models.Model):
 
 class Detalle_venta(models.Model):
     venta = models.ForeignKey(Venta, on_delete=models.PROTECT)
-    producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
+    producto = models.ForeignKey(Producto, on_delete=models.PROTECT, null=True, blank=True)
     cantidadp = models.IntegerField(default=0)
     servicio = models.ForeignKey(Servicio, on_delete=models.PROTECT, null=True, blank=True)
     cantidads = models.IntegerField(default=0)
-    subtotal = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
+    subtotalp = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
+    subtotals = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
 
     def __str__(self):
         return '%s %s %s' % (self.venta, self.producto.nombre, self.servicio.nombre)

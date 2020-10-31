@@ -104,6 +104,7 @@ def crear(request):
     data = {}
     if request.method == 'POST':
         datos = json.loads(request.POST['ventas'])
+        print(datos)
         if datos:
             with transaction.atomic():
                 c = Venta()
@@ -114,18 +115,47 @@ def crear(request):
                 c.iva = float(datos['iva'])
                 c.total = float(datos['total'])
                 c.save()
-                for i in datos['productos']:
-                    dv = Detalle_venta()
-                    dv.venta_id = c.id
-                    dv.producto_id = i['id']
-                    dv.cantidad = int(i['cantidad'])
-                    dv.subtotal = float(i['subtotal'])
-                    dv.save()
-                    x = Producto.objects.get(pk=i['id'])
-                    x.stock = x.stock - int(i['cantidad'])
-                    x.save()
-                    data['id'] = c.id
-                    data['resp'] = True
+                if datos['productos'] and datos['servicios']:
+                    for i in datos['productos']:
+                        dv = Detalle_venta()
+                        dv.venta_id = c.id
+                        dv.producto_id = i['id']
+                        dv.cantidadp = int(i['cantidad'])
+                        x = Producto.objects.get(pk=i['id'])
+                        x.stock = x.stock - int(i['cantidad'])
+                        dv.subtotalp = float(i['subtotal'])
+                        x.save()
+                        for s in datos['servicios']:
+                            dv.servicio_id = s['id']
+                            dv.cantidads = int(s['cantidad'])
+                            dv.subtotals = int(s['subtotal'])
+                        dv.save()
+                        data['id'] = c.id
+                        data['resp'] = True
+                elif datos['productos']:
+                    for i in datos['productos']:
+                        dv = Detalle_venta()
+                        dv.venta_id = c.id
+                        dv.producto_id = i['id']
+                        dv.cantidadp = int(i['cantidad'])
+                        dv.subtotalp = float(i['subtotal'])
+                        dv.save()
+                        x = Producto.objects.get(pk=i['id'])
+                        x.stock = x.stock - int(i['cantidad'])
+                        x.save()
+                        data['id'] = c.id
+                        data['resp'] = True
+                else:
+                    for i in datos['servicios']:
+                        print(datos['servicios'])
+                        dv = Detalle_venta()
+                        dv.venta_id = c.id
+                        dv.servicio_id = i['id']
+                        dv.cantidads = int(i['cantidad'])
+                        dv.subtotals = float(i['subtotal'])
+                        dv.save()
+                        data['id'] = c.id
+                        data['resp'] = True
         else:
             data['resp'] = False
             data['error'] = "Datos Incompletos"

@@ -9,7 +9,7 @@ $(document).ready(function () {
     }, "Letters and spaces only please");
 
 
-     $.validator.setDefaults({
+    $.validator.setDefaults({
         errorClass: 'invalid-feedback',
 
         highlight: function (element, errorClass, validClass) {
@@ -37,7 +37,6 @@ $(document).ready(function () {
                 maxlength: 50,
                 lettersonly: true,
             },
-
             cedula: {
                 required: true,
                 minlength: 10,
@@ -102,8 +101,11 @@ $(document).ready(function () {
 
 });
 
-function eliminar() {
-
+function reset() {
+    var validator = $("#form").validate();
+    validator.resetForm();
+    $('.is-valid').removeClass('is-valid');
+    $('.is-invalid').removeClass('is-invalid');
 }
 
 

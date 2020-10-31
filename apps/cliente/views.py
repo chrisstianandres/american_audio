@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import *
@@ -35,10 +36,13 @@ def cliente_lista(request):
 def data(request):
     data = {}
     try:
-        query = Cliente.objects.all()
         data = []
+        term = request.POST['term']
+        query = Cliente.objects.filter(Q(nombres__icontains=term) | Q(apellidos__icontains=term) | Q(cedula__icontains=term))[0:10]
         for a in query:
-            data.append(a.toJSON())
+            item = a.toJSON()
+            item['text'] = a.get_full_name()
+            data.append(item)
     except Exception as e:
         data['error'] = str(e)
     return JsonResponse(data, safe=False)
@@ -94,21 +98,19 @@ def crearcli(request):
             elif Empleado.objects.filter(cedula=request.POST['cedula']):
                 data['error'] = 'Numero de Cedula ya exitente en los Empleados'
             elif verificar(request.POST['cedula']):
-                c = Cliente()
-                c.nombres = request.POST['nombres']
-                c.apellidos = request.POST['apellidos']
-                c.cedula = request.POST['cedula']
-                c.correo = request.POST['correo']
-                c.sexo = request.POST['sexo']
-                c.telefono = request.POST['telefono']
-                c.direccion = request.POST['direccion']
-                c.save()
-                var= Cliente.objects.get(pk=c.id)
-                data['id'] = var.id
-                data['cli'] = var.nombres + "" + var.apellidos
-                data['resp'] = True
-                print(var.id)
-                return JsonResponse(data)
+                with transaction.atomic():
+                    f = ClienteForm(request.POST)
+                    if f.is_valid():
+                        var = f.save()
+                        data['resp'] = True
+                        data['cliente'] = var.toJSON()
+                        return JsonResponse(data)
+                    else:
+                        errores=[]
+                        c= '\n'
+                        for a in f.errors:
+                            errores.append('El campo '+ a + ' esta ya existe <br/>')
+                        data['error'] = errores
             else:
                 data['error'] = 'Numero de Cedula no valido para Ecuador'
     except Exception as e:

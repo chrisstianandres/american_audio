@@ -262,8 +262,8 @@ $(function () {
         if ($('select[name="cliente"]').val() === "") {
             menssaje_error('Error!', "Debe seleccionar un cliente", 'far fa-times-circle');
             return false
-        } else if (ventas.items.productos.length === 0) {
-            menssaje_error('Error!', "Debe seleccionar al menos un producto", 'far fa-times-circle');
+        } else if (ventas.items.productos.length === 0  && ventas.items.servicios.length ===0)  {
+            menssaje_error('Error!', "Debe seleccionar al menos un producto o servicio", 'far fa-times-circle');
             return false
         }
         var action = $('input[name="action"]').val();
@@ -273,6 +273,7 @@ $(function () {
         ventas.items.cliente = $('#id_cliente option:selected').val();
 
         parametros = {'ventas': JSON.stringify(ventas.items)};
+        console.log(parametros);
         save_with_ajax('Alerta',
             '/venta/crear', 'Esta seguro que desea guardar esta venta?', parametros, function (response) {
                 printpdf('Alerta!', '¿Desea generar el comprobante en PDF?', function () {
@@ -289,23 +290,65 @@ $(function () {
     $('#id_new_client').on('click', function () {
         $('#Modal').modal('show');
     });
-    $('form').on('submit', function (e) {
+    $('#form').on('submit', function (e) {
         e.preventDefault();
-        var parametros = $(this).serialize();
-        var isvalid = $("#form").valid();
+        var parametros = new FormData(this);
+        var isvalid = $(this).valid();
         if (isvalid) {
-            save_with_ajax('Alerta',
+            save_with_ajax2('Alerta',
                 '/cliente/crearcli', 'Esta seguro que desea guardar este cliente?', parametros,
                 function (response) {
                     menssaje_ok('Exito!', 'Exito al guardar este cliente!', 'far fa-smile-wink', function () {
                         $('#Modal').modal('hide');
-                        $('form').trigger("reset");
-                        $('form .form-group').removeClass('is-invalid').removeClass('is-valid');
-                        $('#id_cliente').append('<option value="' + response['id'] + '">' + response['cli'] + '</option>').trigger('change');
+                        console.log(response);
+                        var newOption = new Option(response.cliente['full_name'], response.cliente['id'], false, true);
+                        $('#id_cliente').append(newOption).trigger('change');
                     });
                 });
         }
 
+    });
+
+    $('#id_cliente').select2({
+        theme: "classic",
+        language: {
+            inputTooShort: function () {
+                return "Ingresa al menos un caracter...";
+            },
+            "noResults": function () {
+                return "Sin resultados";
+            },
+            "searching": function () {
+                return "Buscando...";
+            }
+        },
+        allowClear: true,
+        ajax: {
+            delay: 250,
+            type: 'POST',
+            url: '/cliente/data',
+            data: function (params) {
+                var queryParameters = {
+                    term: params.term,
+                };
+                return queryParameters;
+            },
+            processResults: function (data) {
+                return {
+                    results: data
+                };
+
+            },
+
+        },
+        placeholder: 'Busca un cliente',
+        minimumInputLength: 1,
+    });
+
+
+    $('#Modal').on('hidden.bs.modal', function (e) {
+        reset();
+        $('#form').trigger("reset");
     });
 
 

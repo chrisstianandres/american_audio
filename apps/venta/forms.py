@@ -20,10 +20,9 @@ class VentaForm(forms.ModelForm):
                 'class': 'form-control'
             }
             self.fields['cliente'].widget.attrs = {
-                'class': 'form-control select2',
-                'style': 'width: 82%',
-                'data-live-search': "true"
+                'class': 'custom-select select2'
             }
+            self.fields["cliente"].queryset = Cliente.objects.none()
             self.fields['subtotal'].widget.attrs = {
                 'value': '0.00',
                 'class': 'form-control',

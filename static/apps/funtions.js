@@ -47,6 +47,7 @@ function save_with_ajax(title, url, content, parametros, callback) {
                             return false;
                         }
                         menssaje_error('Error', data.error, 'fas fa-exclamation-circle');
+
                     }).fail(function (jqXHR, textStatus, errorThrown) {
                         alert(textStatus + ': ' + errorThrown);
                     });
@@ -134,7 +135,7 @@ function printpdf(title, content, callback, cancel) {
     );
 }
 
-function menssaje_error(title, content, icon) {
+function menssaje_error(title, content, icon, callback) {
     $.confirm({
         theme: 'modern',
         icon: icon,
@@ -145,7 +146,7 @@ function menssaje_error(title, content, icon) {
         buttons: {
             info: {
                 text: '<i class="fas fa-check"></i> Ok',
-                btnClass: 'btn-blue',
+                btnClass: 'btn-blue'
             },
         }
     });
@@ -188,4 +189,48 @@ function login(url, parametros, callback) {
     })
 
 
+}
+
+function save_with_ajax2(title, url, content, parametros, callback) {
+    $.confirm({
+        theme: 'modern',
+        icon: 'fas fa-exclamation-circle',
+        title: title,
+        type: 'blue',
+        content: content,
+        columnClass: 'small',
+        draggable: true,
+        buttons: {
+            si: {
+                text: '<i class="fas fa-check"></i> Si',
+                btnClass: 'btn-blue',
+                action: function () {
+                    $.ajax({
+                        dataType: 'JSON',
+                        type: 'POST',
+                        url: url,
+                        processData: false,
+                        contentType: false,
+                        data: parametros,
+                    }).done(function (data) {
+                        if (!data.hasOwnProperty('error')) {
+                            callback(data);
+                            return false;
+                        }
+                        menssaje_error('Error', data.error, 'fas fa-exclamation-circle');
+
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        alert(textStatus + ': ' + errorThrown);
+                    });
+                }
+            },
+            no: {
+                text: '<i class="fas fa-times"></i> No',
+                btnClass: 'btn-red',
+                action: function () {
+
+                }
+            }
+        }
+    });
 }

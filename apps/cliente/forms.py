@@ -21,12 +21,13 @@ class ClienteForm(forms.ModelForm):
             self.fields['apellidos'].widget = TextInput(
                 attrs={'placeholder': 'Ingrese sus dos Apellidos', 'class': 'form-control form-rounded'})
             self.fields['cedula'].widget = TextInput(
-                attrs={'placeholder': 'Ingrese numero de cedula', 'class': 'form-control form-rounded'})
+                attrs={'placeholder': 'Ingrese un numero de cedula', 'class': 'form-control form-rounded'})
             self.fields['correo'].widget = EmailInput(
                 attrs={'placeholder': 'abc@correo.com', 'class': 'form-control form-rounded'})
-            # self.fields['sexo'].widget.attrs['class'] = 'selectpicker'
-            # self.fields["fecha_nacimiento"].widget = SelectDateWidget(years=years,
-            #                                                         attrs={'class': 'selectpicker'})
+            self.fields['direccion'].widget = TextInput(
+                attrs={'placeholder': 'Ingrese una direccion (Maximo 50 caracteres)', 'class': 'form-control form-rounded'})
+            self.fields['telefono'].widget = TextInput(
+                attrs={'placeholder': 'Ingrese numero de telefono', 'class': 'form-control form-rounded'})
         # habilitar, desabilitar, y mas
 
     class Meta:
@@ -45,8 +46,8 @@ class ClienteForm(forms.ModelForm):
             'cedula': 'N° de cedula',
             'correo': 'Correo',
             'sexo': 'Genero',
-            'telefono': 'telefono',
-            'direccion': 'direccion'
+            'Telefono': 'telefono',
+            'Direccion': 'direccion'
 
         }
         widgets = {
