@@ -173,5 +173,70 @@ $(function () {
                 })
             });
     });
+
+    $('#id_new_proveedor').on('click', function () {
+        $('#Modal').modal('show');
+    });
+    $('#form').on('submit', function (e) {
+        e.preventDefault();
+        var parametros = new FormData(this);
+        var isvalid = $(this).valid();
+        if (isvalid) {
+            save_with_ajax2('Alerta',
+                '/proveedor/crearpro', 'Esta seguro que desea guardar este proveedor?', parametros,
+                function (response) {
+                    menssaje_ok('Exito!', 'Exito al guardar este proveedor!', 'far fa-smile-wink', function () {
+                        $('#Modal').modal('hide');
+                        console.log(response);
+                        var newOption = new Option(response.proveedor['full_name'], response.proveedor['id'], false, true);
+                        $('#id_proveedor').append(newOption).trigger('change');
+                    });
+                });
+        }
+
+    });
+
+    $('#id_proveedor').select2({
+        theme: "classic",
+        language: {
+            inputTooShort: function () {
+                return "Ingresa al menos un caracter...";
+            },
+            "noResults": function () {
+                return "Sin resultados";
+            },
+            "searching": function () {
+                return "Buscando...";
+            }
+        },
+        allowClear: true,
+        ajax: {
+            delay: 250,
+            type: 'POST',
+            url: '/proveedor/data',
+            data: function (params) {
+                var queryParameters = {
+                    term: params.term,
+                };
+                return queryParameters;
+            },
+            processResults: function (data) {
+                return {
+                    results: data
+                };
+
+            },
+
+        },
+        placeholder: 'Busca un proveedor',
+        minimumInputLength: 1,
+    });
+
+
+    $('#Modal').on('hidden.bs.modal', function (e) {
+        reset();
+        $('#form').trigger("reset");
+    });
+
 });
 

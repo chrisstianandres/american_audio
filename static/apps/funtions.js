@@ -234,3 +234,10 @@ function save_with_ajax2(title, url, content, parametros, callback) {
         }
     });
 }
+
+function reset() {
+    var validator = $("#form").validate();
+    validator.resetForm();
+    $('.is-valid').removeClass('is-valid');
+    $('.is-invalid').removeClass('is-invalid');
+}

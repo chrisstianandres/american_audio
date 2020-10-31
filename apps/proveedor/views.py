@@ -1,3 +1,6 @@
+import goslate
+from django.db import transaction
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -73,6 +76,71 @@ def crear(request):
 
                 data['form'] = f
             return render(request, 'front-end/proveedor/proveedor_form.html', data)
+
+
+@csrf_exempt
+def data(request):
+    data = {}
+    try:
+        data = []
+        term = request.POST['term']
+        query = Proveedor.objects.filter(Q(nombres__icontains=term) | Q(numero_documento__icontains=term))[0:10]
+        for a in query:
+            item = a.toJSON()
+            item['text'] = a.get_full_name()
+            data.append(item)
+    except Exception as e:
+        data['error'] = str(e)
+    return JsonResponse(data, safe=False)
+
+
+@csrf_exempt
+def crearpro(request):
+    data = {}
+    try:
+        if request.method == 'POST':
+            f = ProveedorForm(request.POST)
+            if int(f.data['documento']) == 0:
+                if Empleado.objects.filter(cedula=f.data['numero_documento']):
+                    data['error'] = 'Numero de Documento ya exitente en los Empleados'
+                elif Cliente.objects.filter(cedula=f.data['numero_documento']):
+                    data['error'] = 'Numero de Documento ya exitente en los Clientes'
+                elif verificar(f.data['cedula']):
+                    with transaction.atomic():
+                        f = ProveedorForm(request.POST)
+                        if f.is_valid():
+                            var = f.save()
+                            data['resp'] = True
+                            data['proveedor'] = var.toJSON()
+                            return JsonResponse(data)
+                        else:
+                            errores = []
+                            for a in f.errors:
+                                errores.append('El campo ' + a + ' esta ya existe <br/>')
+                            data['error'] = errores
+                else:
+                    data['error'] = 'Numero de Cedula no valido para Ecuador'
+                    data['form'] = f
+            else:
+                if verificar(f.data['numero_documento']):
+                    with transaction.atomic():
+                        f = ProveedorForm(request.POST)
+                        if f.is_valid():
+                            var = f.save()
+                            data['resp'] = True
+                            data['proveedor'] = var.toJSON()
+                            return JsonResponse(data)
+                        else:
+                            errores = []
+                            for a in f.errors:
+                                errores.append('El campo ' + a + ' esta ya existe <br/>')
+                            data['error'] = errores
+                else:
+                    data['error'] = 'Numero de Ruc no valido para Ecuador'
+    except Exception as e:
+        gs = goslate.Goslate()
+        data['error'] = gs.translate(str(e), 'es')
+    return JsonResponse(data)
 
 
 def editar(request, id):

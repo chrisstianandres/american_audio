@@ -22,6 +22,8 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.contrib.staticfiles import finders
 
+from apps.proveedor.forms import ProveedorForm
+
 opc_icono = 'fa fa-shopping-bag'
 opc_entidad = 'Compras'
 crud = '/compra/crear'
@@ -91,6 +93,7 @@ def nuevo(request):
         data['form'] = CompraForm()
         data['form2'] = Detalle_CompraForm()
         data['detalle'] = []
+        data['formp'] = ProveedorForm()
     return render(request, 'front-end/compra/compra_form.html', data)
 
 

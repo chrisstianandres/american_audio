@@ -10,20 +10,18 @@ $(document).ready(function () {
     }, "Letters and spaces only please");
 
 
-     $.validator.setDefaults({
-        errorClass: 'help-block',
+    $.validator.setDefaults({
+        errorClass: 'invalid-feedback',
 
         highlight: function (element, errorClass, validClass) {
             $(element)
-                .parent('div')
-                .addClass("has-error")
-                .removeClass("has-success");
+                .addClass("is-invalid")
+                .removeClass("is-valid");
         },
         unhighlight: function (element, errorClass, validClass) {
             $(element)
-                .parent('div')
-                .addClass("has-success")
-                .removeClass("has-error");
+                .addClass("is-valid")
+                .removeClass("is-invalid");
         }
     });
     $("#form").validate({
@@ -76,7 +74,7 @@ $(document).ready(function () {
                 minlength: "Debe ingresar al menos tres letras",
                 lettersonly: "Debe ingresar unicamente letras y espacios"
             },
-             last_name: {
+            last_name: {
                 required: "Por favor ingresa tus apellidos",
                 minlength: "Debe ingresar al menos tres letras",
                 lettersonly: "Debe ingresar unicamente letras y espacios"
@@ -90,8 +88,8 @@ $(document).ready(function () {
             correo: "Debe ingresar un correo valido",
             cargo: "Debe seleccionar un cargo",
             password: {
-                required:"Debe Ingresar una contraseña",
-                 minlength: "Tu contraseña debe tener al menos 5 digitos"
+                required: "Debe Ingresar una contraseña",
+                minlength: "Tu contraseña debe tener al menos 5 digitos"
             },
             telefono: {
                 required: "Por favor ingresa tu numero celular",

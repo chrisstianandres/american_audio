@@ -16,10 +16,14 @@ class Proveedor(models.Model):
     direccion = models.CharField(max_length=50)
 
     def __str__(self):
-        return '%s %s' % (self.nombres, self.direccion)
+        return '{} / {} / {}'.format(self.nombres, self.direccion, self.numero_documento)
+
+    def get_full_name(self):
+        return '{} / {} / {}'.format(self.nombres, self.direccion, self.numero_documento)
 
     def toJSON(self):
         item = model_to_dict(self)
+        item['full_name'] = self.get_full_name()
         return item
 
     class Meta:

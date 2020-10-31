@@ -5,19 +5,17 @@ $(document).ready(function () {
 
 
     $.validator.setDefaults({
-        errorClass: 'help-block',
+        errorClass: 'invalid-feedback',
 
         highlight: function (element, errorClass, validClass) {
             $(element)
-                .parent('div')
-                .addClass("has-error")
-                .removeClass("has-success");
+                .addClass("is-invalid")
+                .removeClass("is-valid");
         },
         unhighlight: function (element, errorClass, validClass) {
             $(element)
-                .parent('div')
-                .addClass("has-success")
-                .removeClass("has-error");
+                .addClass("is-valid")
+                .removeClass("is-invalid");
         }
     });
     $("#form").validate({
