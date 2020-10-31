@@ -294,26 +294,14 @@ $(function () {
         var parametros = $(this).serialize();
         var isvalid = $("#form").valid();
         if (isvalid) {
-            console.log(parametros);
             save_with_ajax('Alerta',
                 '/cliente/crearcli', 'Esta seguro que desea guardar este cliente?', parametros,
-                function () {
+                function (response) {
                     menssaje_ok('Exito!', 'Exito al guardar este cliente!', 'far fa-smile-wink', function () {
                         $('#Modal').modal('hide');
-                        $.ajax({
-                            dataType: 'JSON',
-                            type: 'POST',
-                            url: '/cliente/data',
-                        }).done(function (data) {
-                            $("#id_cliente").select2("destroy");
-                            $("#id_cliente").select2("val", "");
-                            $.each(data, function (key, value) {
-                                $('#id_cliente').append('<option value="' + value.id + '">' + value.nombres + value.apellidos+'</option>');
-
-                            });
-
-                        });
-
+                        $('form').trigger("reset");
+                        $('form .form-group').removeClass('is-invalid').removeClass('is-valid');
+                        $('#id_cliente').append('<option value="' + response['id'] + '">' + response['cli'] + '</option>').trigger('change');
                     });
                 });
         }

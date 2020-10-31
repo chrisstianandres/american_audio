@@ -101,9 +101,13 @@ def crearcli(request):
                 c.correo = request.POST['correo']
                 c.sexo = request.POST['sexo']
                 c.telefono = request.POST['telefono']
-                c.d = request.POST['direccion']
+                c.direccion = request.POST['direccion']
                 c.save()
+                var= Cliente.objects.get(pk=c.id)
+                data['id'] = var.id
+                data['cli'] = var.nombres + "" + var.apellidos
                 data['resp'] = True
+                print(var.id)
                 return JsonResponse(data)
             else:
                 data['error'] = 'Numero de Cedula no valido para Ecuador'

@@ -163,8 +163,8 @@ function menssaje_ok(title, content, icon, callback) {
             info: {
                 text: '<i class="fas fa-check"></i> Ok',
                 btnClass: 'btn-blue',
-                action: function () {
-                    callback();
+                action: function (data) {
+                    callback(data);
                 }
             },
         }
