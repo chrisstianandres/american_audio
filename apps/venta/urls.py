@@ -14,6 +14,7 @@ urlpatterns = [
     path('editar/<int:id>', views.editar, name='editar'),
     path('editar_save', views.editar_save, name='editar_save'),
     path('get_detalle', login_required(views.get_detalle), name='get_detalle'),
+    path('get_detalle_serv', login_required(views.get_detalle_serv), name='get_detalle_serv'),
     path('estado', login_required(views.estado), name='estado'),
     path('eliminar', login_required(views.eliminar), name='eliminar'),
     path('chart', login_required(views.grap), name='chart'),

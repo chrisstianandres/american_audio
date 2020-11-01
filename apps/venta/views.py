@@ -240,6 +240,7 @@ def get_producto(request):
         data['error'] = 'Ha ocurrido un error'
     return JsonResponse(data, safe=False)
 
+
 @csrf_exempt
 def get_servicio(request):
     data = {}
@@ -269,8 +270,40 @@ def get_detalle(request):
         id = request.POST['id']
         if id:
             data = []
-            for p in Detalle_venta.objects.filter(venta_id=id):
-                data.append(p.toJSON())
+            result = Detalle_venta.objects.filter(venta_id=id)
+            for p in result:
+                if p.producto != None:
+                    data.append({
+                        'producto': p.producto.nombre,
+                        'categoria': p.producto.categoria.nombre,
+                        'presentacion': p.producto.presentacion.nombre,
+                        'cantidad': p.cantidadp,
+                        'pvp': p.producto.pvp,
+                        'subtotal': p.subtotalp
+                    })
+        else:
+            data['error'] = 'Ha ocurrido un error'
+    except Exception as e:
+        data['error'] = str(e)
+    return JsonResponse(data, safe=False)
+
+
+@csrf_exempt
+def get_detalle_serv(request):
+    data = {}
+    try:
+        id = request.POST['id']
+        if id:
+            data = []
+            result = Detalle_venta.objects.filter(venta_id=id)
+            for p in result:
+                if p.servicio!=None:
+                    data.append({
+                        'servicio': p.servicio.nombre,
+                        'cantidad': p.cantidads,
+                        'pvp': p.servicio.pvp,
+                        'subtotal': p.subtotals
+                    })
         else:
             data['error'] = 'Ha ocurrido un error'
     except Exception as e:

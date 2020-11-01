@@ -71,6 +71,7 @@
 </p>
 <table id="invoice">
     <thead>
+    {% if d.producto.id != None %}
     <tr>
         <th style="width: 40%;"> PRODUCTO</th>
         <th style="width: 20%;"> CATEGORIA</th>
@@ -80,17 +81,37 @@
         <th style="width: 15%;"> SUBTOTAL</th>
 
     </tr>
+     {% endif %}
     </thead>
     <tbody>
     {% for d in sale.detalle_venta_set.all %}
-        <tr {% if forloop.first %}style="padding-top: 3px;" {% endif %}>
-            <td>{{ d.producto.nombre }}</td>
-            <td>{{ d.producto.categoria.nombre }}</td>
-            <td>{{ d.producto.presentacion.nombre }}</td>
-            <td class="text-center">{{ d.cantidad }}</td>
-            <td class="text-center">${{ d.producto.pvp }}</td>
-            <td style="text-align: right;">${{ d.subtotal }}</td>
-        </tr>
+        {% if d.producto.id != None %}
+            <tr {% if forloop.first %}style="padding-top: 3px;" {% endif %}>
+                <td>{{ d.producto.nombre }}</td>
+                <td>{{ d.producto.categoria.nombre }}</td>
+                <td>{{ d.producto.presentacion.nombre }}</td>
+                <td class="text-center">{{ d.cantidadp }}</td>
+                <td class="text-center">${{ d.producto.pvp }}</td>
+                <td style="text-align: right;">${{ d.subtotalp }}</td>
+            </tr>
+            <tr></tr>
+        {% endif %}
+        <thead>
+        {% if d.servicio.id != None %}
+            <tr>
+                <th style="width: 40%;" colspan="3"> SERVICIO</th>
+                <th style="width: 10%;" class="text-center">&nbsp;CANT</th>
+                <th style="width: 15%;"> P.UNITARIO</th>
+                <th style="width: 15%;"> SUBTOTAL</th>
+            </tr>
+            </thead>
+            <tr {% if forloop.first %}style="padding-top: 3px;" {% endif %}>
+                <td colspan="3">{{ d.servicio.nombre }}</td>
+                <td class="text-center">{{ d.cantidads }}</td>
+                <td class="text-center">${{ d.servicio.pvp }}</td>
+                <td style="text-align: right;">${{ d.subtotals }}</td>
+            </tr>
+        {% endif %}
     {% endfor %}
     <tr style="border-top: 1px solid black; padding-top: 4px;"></tr>
     <tr></tr>

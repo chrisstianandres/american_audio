@@ -284,7 +284,7 @@ $(function () {
                 width: "15%",
                 render: function (data, type, row) {
                     var detalle = '<a type="button" rel="detalle" class="btn btn-success btn-sm btn-round" data-toggle="tooltip" title="Detalle de Productos" ><i class="fa fa-search"></i></a>' + ' ';
-                    var devolver = '<a type="button" rel="devolver" class="btn btn-danger btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Devolver"><i class="fa fa-times"></i></a>'+ ' ';
+                    var devolver = '<a type="button" rel="devolver" class="btn btn-danger btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Devolver"><i class="fa fa-times"></i></a>' + ' ';
                     var pdf = '<a type="button" href= "/venta/printpdf/' + row[4] + '" rel="pdf" class="btn btn-primary btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Reporte PDF"><i class="fa fa-file-pdf"></i></a>';
                     return detalle + devolver + pdf;
                 }
@@ -332,50 +332,87 @@ $(function () {
                 menssaje_ok('Exito!', 'Exito al Eliminar la venta', 'far fa-smile-wink')
             });
     }).on('click', 'a[rel="detalle"]', function () {
-            $('.tooltip').remove();
-            var tr = datatable.cell($(this).closest('td, li')).index();
-            var data = datatable.row(tr.row).data();
-            $('#Modal').modal('show');
-            $("#tbldetalle_productos").DataTable({
-                responsive: true,
-                autoWidth: false,
-                language: {
-                    "url": '//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json'
+        $('.tooltip').remove();
+        var tr = datatable.cell($(this).closest('td, li')).index();
+        var data = datatable.row(tr.row).data();
+        var resp = {};
+        $('#Modal').modal('show');
+        $("#tbldetalle_productos").DataTable({
+            responsive: true,
+            autoWidth: false,
+            language: {
+                "url": '//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json'
+            },
+            destroy: true,
+            ajax: {
+                url: '/venta/get_detalle',
+                type: 'Post',
+                data: {
+                    'id': data['4']
                 },
-                destroy: true,
-                ajax: {
-                    url: '/venta/get_detalle',
-                    type: 'Post',
-                    data: {
-                        'id': data['4']
-                    },
-                    dataSrc: ""
+                dataSrc: ""
+            },
+            columns: [
+                {data: 'producto'},
+                {data: 'categoria'},
+                {data: 'presentacion'},
+                {data: 'cantidad'},
+                {data: 'pvp'},
+                {data: 'subtotal'}
+            ],
+            columnDefs: [
+                {
+                    targets: '_all',
+                    class: 'text-center'
                 },
-                columns: [
-                    {data: 'producto.nombre'},
-                    {data: 'producto.categoria.nombre'},
-                    {data: 'producto.presentacion.nombre'},
-                    {data: 'cantidad'},
-                    {data: 'producto.pvp'},
-                    {data: 'subtotal'}
-                ],
-                columnDefs: [
-                    {
-                        targets: '_all',
-                        class: 'text-center'
-                    },
-                    {
-                        targets: [-1, -2],
-                        class: 'text-center',
-                        orderable: false,
-                        render: function (data, type, row) {
-                            return '$' + parseFloat(data).toFixed(2);
-                        }
-                    },
-                ],
-            });
-
+                {
+                    targets: [-1, -2],
+                    class: 'text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return '$' + parseFloat(data).toFixed(2);
+                    }
+                },
+            ],
         });
+        $("#tbldetalle_servicios").DataTable({
+            responsive: true,
+            autoWidth: false,
+            language: {
+                "url": '//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json'
+            },
+            destroy: true,
+            ajax: {
+                url: '/venta/get_detalle_serv',
+                type: 'POST',
+                data: {
+                    'id': data['4']
+                },
+                dataSrc: ""
+            },
+            columns: [
+                {data: 'servicio'},
+                {data: 'cantidad'},
+                {data: 'pvp'},
+                {data: 'subtotal'}
+            ],
+            columnDefs: [
+                {
+                    targets: '_all',
+                    class: 'text-center'
+                },
+                {
+                    targets: [-1, -2],
+                    class: 'text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return '$' + parseFloat(data).toFixed(2);
+                    }
+                },
+            ],
+        });
+
+    });
 
 });
 
