@@ -13,6 +13,7 @@ from django.views.generic import *
 from apps.backEnd import nombre_empresa
 from apps.cliente.forms import ClienteForm
 from apps.compra.models import Compra
+from apps.inventario.models import Inventario
 from apps.servicio.models import Servicio
 from apps.venta.forms import VentaForm, Detalle_VentaForm
 from apps.venta.models import Venta, Detalle_venta
@@ -104,8 +105,8 @@ def crear(request):
     data = {}
     if request.method == 'POST':
         datos = json.loads(request.POST['ventas'])
-        print(datos)
         if datos:
+            dtp = []
             with transaction.atomic():
                 c = Venta()
                 c.fecha_venta = datos['fecha_venta']
@@ -125,6 +126,12 @@ def crear(request):
                         x.stock = x.stock - int(i['cantidad'])
                         dv.subtotalp = float(i['subtotal'])
                         x.save()
+                        inv = Inventario.objects.filter(producto_id=i['id'], estado=1)[:i['cantidad']]
+                        for itr in inv:
+                            x = Inventario.objects.get(pk=itr.id)
+                            x.estado = 0
+                            x.venta_id = c.id
+                            x.save()
                         for s in datos['servicios']:
                             dv.servicio_id = s['id']
                             dv.cantidads = int(s['cantidad'])
@@ -143,19 +150,24 @@ def crear(request):
                         x = Producto.objects.get(pk=i['id'])
                         x.stock = x.stock - int(i['cantidad'])
                         x.save()
-                        data['id'] = c.id
-                        data['resp'] = True
+                    inv = Inventario.objects.filter(producto_id=i['id'], estado=1)[:i['cantidad']]
+                    for itr in inv:
+                        x = Inventario.objects.get(pk=itr.id)
+                        x.estado= 0
+                        x.venta_id = c.id
+                        x.save()
+                    data['id'] = c.id
+                    data['resp'] = True
                 else:
                     for i in datos['servicios']:
-                        print(datos['servicios'])
                         dv = Detalle_venta()
                         dv.venta_id = c.id
                         dv.servicio_id = i['id']
                         dv.cantidads = int(i['cantidad'])
                         dv.subtotals = float(i['subtotal'])
                         dv.save()
-                        data['id'] = c.id
-                        data['resp'] = True
+                    data['id'] = c.id
+                    data['resp'] = True
         else:
             data['resp'] = False
             data['error'] = "Datos Incompletos"
@@ -451,10 +463,11 @@ class printpdf(View):
             context = {'title': 'Comprobante de Venta',
                        'sale': Venta.objects.get(pk=self.kwargs['pk']),
                        'empresa': Empresa.objects.get(id=1),
-                       'icon': 'media/logo_don_chuta.png'
+                       'icon': 'media/logo_don_chuta.png',
+                       'inventario': Inventario.objects.filter(venta_id=self.kwargs['pk'])
                        }
+            print(context)
             html = template.render(context)
-
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = 'attachment; filename="report.pdf"'
             pisa_status = pisa.CreatePDF(html, dest=response, link_callback=self.link_callback)

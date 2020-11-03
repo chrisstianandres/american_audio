@@ -71,17 +71,20 @@
 </p>
 <table id="invoice">
     <thead>
-    {% if d.producto.id != None %}
-    <tr>
-        <th style="width: 40%;"> PRODUCTO</th>
-        <th style="width: 20%;"> CATEGORIA</th>
-        <th style="width: 20%;"> PRESENTACION</th>
-        <th style="width: 10%;" class="text-center">&nbsp;CANT</th>
-        <th style="width: 15%;"> P.UNITARIO</th>
-        <th style="width: 15%;"> SUBTOTAL</th>
+    {% for d in sale.detalle_venta_set.all %}
+        {% if d.producto.id != None %}
+            <tr>
+                <th style="width: 40%;"> PRODUCTO</th>
+                <th style="width: 20%;"> CATEGORIA</th>
+                <th style="width: 20%;"> PRESENTACION</th>
+                <th style="width: 10%;" class="text-center">&nbsp;CANT</th>
+                <th style="width: 15%;"> P.UNITARIO</th>
+                <th style="width: 15%;"> SUBTOTAL</th>
 
-    </tr>
-     {% endif %}
+            </tr>
+        {% endif %}
+    {% endfor %}
+
     </thead>
     <tbody>
     {% for d in sale.detalle_venta_set.all %}
@@ -96,6 +99,7 @@
             </tr>
             <tr></tr>
         {% endif %}
+        <tr style="border-top: 1px solid black; padding-top: 4px;"></tr>
         <thead>
         {% if d.servicio.id != None %}
             <tr>
@@ -111,9 +115,32 @@
                 <td class="text-center">${{ d.servicio.pvp }}</td>
                 <td style="text-align: right;">${{ d.subtotals }}</td>
             </tr>
+            <tr style="border-top: 1px solid black; padding-top: 4px;"></tr>
         {% endif %}
+
     {% endfor %}
-    <tr style="border-top: 1px solid black; padding-top: 4px;"></tr>
+    <tr></tr>
+    <tr></tr>
+    <tr></tr>
+    {% if inventario %}
+        <tr>
+            <td colspan="6"><h3><strong>DETALLE INDIVIDUAL DE PRODUCTOS ELECTRONICOS</strong></h3></td>
+        </tr>
+        <thead>
+            <tr>
+                <th style="width: 40%;" colspan="4"> PRODUCTO</th>
+                <th style="width: 15%;" colspan="2"> # SERIE</th>
+            </tr>
+            </thead>
+        {% for dato in inventario %}
+
+            <tr {% if forloop.first %}style="padding-top: 3px;" {% endif %}>
+                <td colspan="4">{{ dato.producto.nombre }}</td>
+                <td colspan="2">{{ dato.serie }}</td>
+            </tr>
+        {% endfor %}
+        <tr style="border-top: 1px solid black; padding-top: 4px;"></tr>
+    {% endif %}
     <tr></tr>
     <tr></tr>
     <tr style="padding-top: 0px;">

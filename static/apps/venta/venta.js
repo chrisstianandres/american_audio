@@ -273,7 +273,6 @@ $(function () {
         ventas.items.cliente = $('#id_cliente option:selected').val();
 
         parametros = {'ventas': JSON.stringify(ventas.items)};
-        console.log(parametros);
         save_with_ajax('Alerta',
             '/venta/crear', 'Esta seguro que desea guardar esta venta?', parametros, function (response) {
                 printpdf('Alerta!', '¿Desea generar el comprobante en PDF?', function () {

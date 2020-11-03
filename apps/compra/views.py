@@ -122,7 +122,16 @@ def crear(request):
                     x = Producto.objects.get(pk=i['id'])
                     x.stock = x.stock + int(i['cantidad'])
                     x.save()
+                    productos = []
+                    for p in range(0, i['cantidad']):
+                        item = c.toJSON()
+                        item['producto'] = x.toJSON()
+                        item['serie'] = 0
+                        item['fecha_salida'] = ''
+                        item['estado'] = 1
+                        productos.append(item)
                     data['id'] = c.id
+                    data['productos'] = productos
                     data['resp'] = True
         else:
             data['resp'] = False

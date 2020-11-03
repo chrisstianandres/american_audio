@@ -56,7 +56,6 @@ var compras = {
                     render: function (data, type, row) {
                         return '<a rel="remove" type="button" class="btn btn-danger btn-sm btn-flat" style="color: white" data-toggle="tooltip" title="Eliminar Insumo"><i class="fa fa-trash-alt"></i></a>';
                         //return '<a rel="remove" class="btn btn-danger btn-sm btn-flat"><i class="fas fa-trash-alt"></i></a>';
-
                     }
                 },
                 {
@@ -164,13 +163,15 @@ $(function () {
         parametros = {'compras': JSON.stringify(compras.items)};
         save_with_ajax('Alerta',
             '/compra/crear', 'Esta seguro que desea guardar esta compra?', parametros, function (response) {
+                var ok = {'productos':response['productos']};
+                $('[name="datos"]').attr('value', JSON.stringify(response['productos']));
                 printpdf('Alerta!', '¿Desea generar el comprobante en PDF?', function () {
                     window.open('/compra/printpdf/' + response['id'], '_blank');
-                    // location.href = '/venta/printpdf/' + response['id'];
-                    location.href = '/compra/lista';
+                    $('#form_in').submit();
                 }, function () {
-                    location.href = '/compra/lista';
-                })
+                    $('#form_in').submit();
+
+                });
             });
     });
 
