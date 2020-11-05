@@ -14,7 +14,8 @@ toDataURL('/media/logo_don_chuta.png').then(dataUrl => {
 var datos = {
     fechas: {
         'start_date': '',
-        'end_date': ''
+        'end_date': '',
+        'tipo': 0
     },
     add: function (data) {
         if (data.key === 1) {
@@ -38,10 +39,25 @@ var datos = {
     },
 };
 $(function () {
+    daterange();
+    $('.tipo_prod').select2().on('select2:select', function (e) {
+        datos.fechas.tipo = $('.tipo_prod option:selected').val();
+        $.ajax({
+            type: "POST",
+            url: '/venta/data_report',
+            data: datos.fechas,
+            dataType: 'json',
+            success: function (data) {
+                datatable.clear();
+                datatable.rows.add(data).draw();
+            },
+        })
+    });
     datatable = $("#datatable").DataTable({
         destroy: true,
         scrollX: true,
         autoWidth: false,
+        order: [[ 2, "asc" ]],
         ajax: {
             url: '/venta/data_report',
             type: 'POST',
@@ -67,15 +83,8 @@ $(function () {
             }
         },
 
-        dom: 'B<"toolbar">lfrtip ',
+         dom: 'l<"toolbar">'+"<br>"+'Bfrtip ',
         buttons: [
-            {
-                text: '<i class="fa fa-search-minus"> Filtar por fecha</i>',
-                className: 'btn-success my_class',
-                action: function (e, dt, node, config) {
-                    daterange();
-                }
-            },
             {
                 className: 'btn-default my_class',
                 extend: 'searchPanes',
@@ -86,16 +95,16 @@ $(function () {
                 }
             },
             {
-                text: '<i class="fa fa-file-pdf"> Reporte PDF</i>',
-                className: 'btn btn-danger my_class',
+                text: '<i class="far fa-file-pdf"></i> Reporte PDF</i>',
+                className: 'btn btn-danger',
                 extend: 'pdfHtml5',
-                footer: true ,
+                footer: true,
                 //filename: 'dt_custom_pdf',
                 orientation: 'landscape', //portrait
                 pageSize: 'A4', //A3 , A5 , A6 , legal , letter
                 download: 'open',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4],
+                    columns: [0, 1, 2, 3, 4, 5],
                     search: 'applied',
                     order: 'applied'
                 },
@@ -164,22 +173,22 @@ $(function () {
                         return 4;
                     };
                     doc.content[0].layout = objLayout;
-                    doc.content[1].table.widths = ["*", "*", "*", "*", "*"];
+                    doc.content[1].table.widths = ["*", "*", "*", "*", "*", "*"];
                     doc.styles.tableBodyEven.alignment = 'center';
                     doc.styles.tableBodyOdd.alignment = 'center';
                     doc.styles.tableFooter.alignment = 'center';
                 }
             },
             {
-                text: '<i class="fa fa-file-excel"> Reporte Excel</i>', className: "btn btn-success my_class",
+                text: '<i class="far fa-file-excel"></i> Reporte Excel</i>', className: "btn btn-success my_class",
                 extend: 'excel',
                 footer: true
             },
             {
-                text: '<i class="fas fa-funnel-dollar"> Reporte por Totales</i>',
+                text: '<i class="fas fa-funnel-dollar"></i> Reporte por Totales</i>',
                 className: 'btn-primary my_class',
                 action: function (e, dt, node, config) {
-                    window.location.href = $('#filter_prod').val();
+                    window.location.href = '/venta/report_total'
                 }
             },
         ],
@@ -247,7 +256,7 @@ $(function () {
                 },
                 targets: [2],
             },
-               {
+            {
                 searchPanes: {
                     show: true,
                     options: [
@@ -369,57 +378,61 @@ $(function () {
                 class: 'text-center',
                 orderable: false,
                 render: function (data, type, row) {
-                    return '$ ' + data ;
+                    return '$ ' + data;
                 }
             },
             {
                 targets: [-1],
                 width: '20%',
                 render: function (data, type, row) {
-                    return '$ ' + data ;
+                    return '$ ' + data;
                 }
             },
         ],
-        footerCallback : function ( row, data, start, end, display ) {
-                 var api = this.api(), data;
+        footerCallback: function (row, data, start, end, display) {
+            var api = this.api(), data;
 
-                 // Remove the formatting to get integer data for summation
-                 var intVal = function ( i ) {
-                     return typeof i === 'string' ?
-                         i.replace(/[\$,]/g, '')*1 :
-                         typeof i === 'number' ?
-                             i : 0;
-                 };
-                 // Total over this page
-                 pageTotal = api
-                     .column( 4, { page: 'current'} )
-                     .data()
-                     .reduce( function (a, b) {
+            // Remove the formatting to get integer data for summation
+            var intVal = function (i) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '') * 1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+            // Total over this page
+            pageTotal = api
+                .column(5, {page: 'current'})
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            total = api.column( 5 ).data().reduce( function (a, b) {
                          return intVal(a) + intVal(b);
-                     }, 0 );
-                 cantTotal = api
-                     .column( 2, { page: 'current'} )
-                     .data()
-                     .reduce( function (a, b) {
-                         return intVal(a) + intVal(b);
-                     }, 0 );
+                         }, 0 );
 
-                 // Update footer
-                 $( api.column( 4 ).footer() ).html(
-                     '$'+parseFloat(pageTotal).toFixed(2)
-                     // parseFloat(data).toFixed(2)
-                 );
-                 $( api.column( 2 ).footer() ).html(
-                     cantTotal
-                     // parseFloat(data).toFixed(2)
-                 );
-             },
+            cantTotal = api
+                .column(3, {page: 'current'})
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+
+            // Update footer
+            $(api.column(5).footer()).html(
+                '$' + parseFloat(pageTotal).toFixed(2) + '( $ ' + parseFloat(total).toFixed(2) + ')'
+                // parseFloat(data).toFixed(2)
+            );
+            $(api.column(3).footer()).html(
+                cantTotal
+                // parseFloat(data).toFixed(2)
+            );
+        },
 
     });
 });
 
 function daterange() {
-    $("div.toolbar").html('<br><div class="col-lg-3"><input type="text" name="fecha" class="form-control form-control-sm input-sm"></div> <br>');
+    // $("div.toolbar").html('<br><div class="col-lg-3"><input type="text" name="fecha" class="form-control form-control-sm input-sm"></div> <br>');
     $('input[name="fecha"]').daterangepicker({
         locale: {
             format: 'YYYY-MM-DD',
@@ -428,13 +441,14 @@ function daterange() {
         }
     }).on('apply.daterangepicker', function (ev, picker) {
         picker['key'] = 1;
+        picker['tipo'] = $('.tipo_prod option:selected').val();
         datos.add(picker);
         // filter_by_date();
 
     }).on('cancel.daterangepicker', function (ev, picker) {
         picker['key'] = 0;
+        picker['tipo'] = $('.tipo_prod option:selected').val();
         datos.add(picker);
-
     });
 
 }

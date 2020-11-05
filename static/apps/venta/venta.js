@@ -307,7 +307,6 @@ $(function () {
         }
 
     });
-
     $('#id_cliente').select2({
         theme: "classic",
         language: {
@@ -343,8 +342,6 @@ $(function () {
         placeholder: 'Busca un cliente',
         minimumInputLength: 1,
     });
-
-
     $('#Modal').on('hidden.bs.modal', function (e) {
         reset();
         $('#form').trigger("reset");

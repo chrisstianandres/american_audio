@@ -85,7 +85,7 @@ def data(request):
 
 def nuevo(request):
     data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'crud': '../compra/get_producto', 'empresa' : empresa,
+        'icono': opc_icono, 'entidad': opc_entidad, 'crud': '../compra/get_producto', 'empresa': empresa,
         'boton': 'Guardar Compra', 'action': 'add', 'titulo': 'Nuevo Registro de una Compra',
         'key': ''
     }
@@ -141,7 +141,7 @@ def crear(request):
 
 def editar(request, id):
     data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'crud': '../../compra/get_producto', 'empresa' : empresa,
+        'icono': opc_icono, 'entidad': opc_entidad, 'crud': '../../compra/get_producto', 'empresa': empresa,
         'boton': 'Editar Compra', 'action': 'edit', 'titulo': 'Editar Registro de una Compra',
         'key': id
     }
@@ -338,3 +338,106 @@ class printpdf(View):
         except:
             pass
         return HttpResponseRedirect(reverse_lazy('compra:lista'))
+
+
+@csrf_exempt
+def data_report(request):
+    data = []
+    start_date = request.POST.get('start_date', '')
+    end_date = request.POST.get('end_date', '')
+    try:
+        if start_date == '' and end_date == '':
+            print(14)
+            query = Detalle_compra.objects.values('compra__fecha_compra', 'producto__nombre',
+                                                 'producto__pvp').order_by(). \
+                annotate(Sum('cantidad'))
+            for p in query:
+                data.append([
+                    p['compra__fecha_compra'].strftime("%d/%m/%Y"),
+                    p['producto__nombre'],
+                    int(p['cantidad__sum']),
+                    format(p['producto__pvp'], '.2f'),
+                    format(p['producto__pvp'] * p['cantidad__sum'], '.2f'),
+                ])
+
+        else:
+            query = Detalle_compra.objects.values('compra__fecha_compra', 'producto__nombre', 'producto__pvp') \
+                .filter(compra__fecha_compra__range=[start_date, end_date]).order_by().annotate(Sum('cantidad'))
+            for p in query:
+                data.append([
+                    p['compra__fecha_compra'].strftime("%d/%m/%Y"),
+                    p['producto__nombre'],
+                    int(p['cantidad__sum']),
+                    format(p['producto__pvp'], '.2f'),
+                    format(p['producto__pvp'] * p['cantidad__sum'], '.2f'),
+                ])
+    except:
+        pass
+    return JsonResponse(data, safe=False)
+
+
+class report(ListView):
+    model = Compra
+    template_name = 'front-end/compra/compra_report_product.html'
+
+    def get_queryset(self):
+        return Compra.objects.none()
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['icono'] = opc_icono
+        data['entidad'] = opc_entidad
+        data['boton'] = 'Nueva Compra'
+        data['titulo'] = 'Reporte de Compras'
+        data['nuevo'] = '/compra/nuevo'
+        data['filter_prod'] = '/compra/report_total'
+        return data
+
+
+@csrf_exempt
+def data_report_total(request):
+    data = []
+    start_date = request.POST.get('start_date', '')
+    end_date = request.POST.get('end_date', '')
+    try:
+        if start_date == '' and end_date == '':
+            query = Compra.objects.values('fecha_compra', 'proveedor__nombres', 'empleado__first_name', 'empleado__last_name', 'total')
+            for p in query:
+                data.append([
+                    p['fecha_compra'].strftime("%d/%m/%Y"),
+                    p['proveedor__nombres'],
+                    p['empleado__first_name'] + " " + p['empleado__last_name'],
+                    format(p['total'], '.2f')
+                ])
+        else:
+            query = Compra.objects.values('fecha_compra', 'proveedor__nombres', 'empleado__first_name',
+                                          'empleado__last_name', 'total').filter(
+                fecha_compra__range=[start_date, end_date])
+            for p in query:
+                data.append([
+                    p['fecha_compra'].strftime("%d/%m/%Y"),
+                    p['proveedor__nombres'],
+                    p['empleado__first_name'] + " " + p['empleado__last_name'],
+                    format(p['total'], '.2f')
+                ])
+    except:
+        pass
+    return JsonResponse(data, safe=False)
+
+
+class report_total(ListView):
+    model = Compra
+    template_name = 'front-end/compra/compra_report_total.html'
+
+    def get_queryset(self):
+        return Compra.objects.none()
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['icono'] = opc_icono
+        data['entidad'] = opc_entidad
+        data['boton'] = 'Nueva Compra'
+        data['titulo'] = 'Reporte de Compras Totales'
+        data['nuevo'] = '/compra/nuevo'
+        data['filter_prod'] = '/compra/report_by_product'
+        return data

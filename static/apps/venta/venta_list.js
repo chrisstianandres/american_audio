@@ -38,6 +38,7 @@ var datos = {
     },
 };
 $(function () {
+    daterange();
     datatable = $("#datatable").DataTable({
         // responsive: true,
         destroy: true,
@@ -68,15 +69,8 @@ $(function () {
             }
         },
         order: [[0, "desc"]],
-        dom: 'B<"toolbar">frtip ',
+        dom: 'l<"toolbar">' + "<br>" + 'Bfrtip ',
         buttons: [
-            {
-                text: '<i class="fa fa-search-minus"> Filtar por fecha</i>',
-                className: 'btn-success my_class',
-                action: function (e, dt, node, config) {
-                    daterange();
-                }
-            },
             {
                 className: 'btn-default my_class',
                 extend: 'searchPanes',
@@ -87,7 +81,7 @@ $(function () {
                 }
             },
             {
-                text: '<i class="fa fa-file-pdf"> Reporte PDF</i>',
+                text: '<i class="fa fa-file-pdf"> </i> Reporte PDF',
                 className: 'btn btn-danger my_class',
                 extend: 'pdfHtml5',
                 //filename: 'dt_custom_pdf',
@@ -170,11 +164,17 @@ $(function () {
                 }
             },
             {
-                text: '<i class="fa fa-file-excel"> Reporte Excel</i>', className: "btn btn-success my_class",
+                text: '<i class="fa fa-file-excel"> </i> Reporte Excel', className: "btn btn-success my_class",
                 extend: 'excel'
             }
         ],
         columnDefs: [
+            {
+                searchPanes: {
+                    show: false,
+                },
+                targets: [0],
+            },
             {
                 searchPanes: {
                     show: true,
@@ -283,7 +283,7 @@ $(function () {
                 class: 'text-center',
                 width: "15%",
                 render: function (data, type, row) {
-                    var detalle = '<a type="button" rel="detalle" class="btn btn-success btn-sm btn-round" data-toggle="tooltip" title="Detalle de Productos" ><i class="fa fa-search"></i></a>' + ' ';
+                    var detalle = '<a type="button" rel="detalle" class="btn btn-success btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Detalle de Productos" ><i class="fa fa-search"></i></a>' + ' ';
                     var devolver = '<a type="button" rel="devolver" class="btn btn-danger btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Devolver"><i class="fa fa-times"></i></a>' + ' ';
                     var pdf = '<a type="button" href= "/venta/printpdf/' + row[4] + '" rel="pdf" class="btn btn-primary btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Reporte PDF"><i class="fa fa-file-pdf"></i></a>';
                     return detalle + devolver + pdf;
@@ -298,9 +298,9 @@ $(function () {
         ],
         createdRow: function (row, data, dataIndex) {
             if (data[5] === 'FINALIZADA') {
-                $('td', row).eq(5).find('span').addClass('badge bg-success');
+                $('td', row).eq(5).find('span').addClass('badge bg-success').attr("style", "color: white");
             } else if (data[5] === 'DEVUELTA') {
-                $('td', row).eq(5).find('span').addClass('badge bg-important');
+                $('td', row).eq(5).find('span').addClass('badge bg-important').attr("style", "color: white");
                 $('td', row).eq(6).find('a[rel="devolver"]').hide();
                 $('td', row).eq(6).find('a[rel="pdf"]').hide();
             }
@@ -374,6 +374,30 @@ $(function () {
                     }
                 },
             ],
+            footerCallback: function (row, data, start, end, display) {
+                var api = this.api(), data;
+
+                // Remove the formatting to get integer data for summation
+                var intVal = function (i) {
+                    return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '') * 1 :
+                        typeof i === 'number' ?
+                            i : 0;
+                };
+                // Total over this page
+                pageTotal = api
+                    .column(3, {page: 'current'})
+                    .data()
+                    .reduce(function (a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0);
+
+                // Update footer
+                $(api.column(3).footer()).html(
+                    '$' + parseFloat(pageTotal).toFixed(2)
+                    // parseFloat(data).toFixed(2)
+                );
+            },
         });
         $("#tbldetalle_servicios").DataTable({
             responsive: true,

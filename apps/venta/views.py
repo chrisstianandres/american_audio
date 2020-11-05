@@ -87,8 +87,9 @@ def data(request):
 
 def nuevo(request):
     data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'crud': '../venta/get_producto', 'crudserv': '../venta/get_servicio',
-        'empresa' : empresa,
+        'icono': opc_icono, 'entidad': opc_entidad, 'crud': '../venta/get_producto',
+        'crudserv': '../venta/get_servicio',
+        'empresa': empresa,
         'boton': 'Guardar Venta', 'action': 'add', 'titulo': 'Nuevo Registro de una Venta',
         'key': ''
     }
@@ -153,7 +154,7 @@ def crear(request):
                     inv = Inventario.objects.filter(producto_id=i['id'], estado=1)[:i['cantidad']]
                     for itr in inv:
                         x = Inventario.objects.get(pk=itr.id)
-                        x.estado= 0
+                        x.estado = 0
                         x.venta_id = c.id
                         x.save()
                     data['id'] = c.id
@@ -176,7 +177,7 @@ def crear(request):
 
 def editar(request, id):
     data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'crud': '../../venta/get_producto', 'empresa' : empresa,
+        'icono': opc_icono, 'entidad': opc_entidad, 'crud': '../../venta/get_producto', 'empresa': empresa,
         'boton': 'Editar Venta', 'action': 'edit', 'titulo': 'Editar Registro de una Venta',
         'key': id
     }
@@ -309,7 +310,7 @@ def get_detalle_serv(request):
             data = []
             result = Detalle_venta.objects.filter(venta_id=id)
             for p in result:
-                if p.servicio!=None:
+                if p.servicio != None:
                     data.append({
                         'servicio': p.servicio.nombre,
                         'cantidad': p.cantidads,
@@ -466,7 +467,6 @@ class printpdf(View):
                        'icon': 'media/logo_don_chuta.png',
                        'inventario': Inventario.objects.filter(venta_id=self.kwargs['pk'])
                        }
-            print(context)
             html = template.render(context)
             response = HttpResponse(content_type='application/pdf')
             response['Content-Disposition'] = 'attachment; filename="report.pdf"'
@@ -475,3 +475,182 @@ class printpdf(View):
         except:
             pass
         return HttpResponseRedirect(reverse_lazy('venta:lista'))
+
+
+@csrf_exempt
+def data_report(request):
+    data = []
+    start_date = request.POST.get('start_date', '')
+    end_date = request.POST.get('end_date', '')
+    tipo = request.POST.get('tipo', '')
+    try:
+        if int(tipo) == 1:
+            if start_date == '' and end_date == '':
+                query = Detalle_venta.objects.values('venta__fecha_venta', 'producto__nombre',
+                                                     'producto__pvp').order_by(). \
+                    annotate(Sum('cantidadp'))
+                for p in query:
+                    data.append([
+                        p['venta__fecha_venta'].strftime("%d/%m/%Y"),
+                        p['producto__nombre'],
+                        'Producto',
+                        int(p['cantidadp__sum']),
+                        format(p['producto__pvp'], '.2f'),
+                        format(p['producto__pvp'] * p['cantidadp__sum'], '.2f'),
+                    ])
+
+            else:
+                query = Detalle_venta.objects.values('venta__fecha_venta', 'producto__nombre', 'producto__pvp') \
+                    .filter(venta__fecha_venta__range=[start_date, end_date]).order_by().annotate(Sum('cantidadp'))
+                for p in query:
+                    data.append([
+                        p['venta__fecha_venta'].strftime("%d/%m/%Y"),
+                        p['producto__nombre'],
+                        'Producto',
+                        int(p['cantidadp__sum']),
+                        format(p['producto__pvp'], '.2f'),
+                        format(p['producto__pvp'] * p['cantidadp__sum'], '.2f'),
+                    ])
+        elif int(tipo) == 2:
+            if start_date == '' and end_date == '':
+                query = Detalle_venta.objects.values('venta__fecha_venta', 'servicio__nombre',
+                                                     'servicio__pvp').order_by(). \
+                    annotate(Sum('cantidads'))
+                for p in query:
+                    data.append([
+                        p['venta__fecha_venta'].strftime("%d/%m/%Y"),
+                        p['servicio__nombre'],
+                        'Servicio',
+                        int(p['cantidads__sum']),
+                        format(p['servicio__pvp'], '.2f'),
+                        format(p['servicio__pvp'] * p['cantidads__sum'], '.2f'),
+                    ])
+
+            else:
+                query = Detalle_venta.objects.values('venta__fecha_venta', 'servicio__nombre', 'servicio__pvp') \
+                    .filter(venta__fecha_venta__range=[start_date, end_date]).order_by().annotate(Sum('cantidads'))
+                for p in query:
+                    data.append([
+                        p['venta__fecha_venta'].strftime("%d/%m/%Y"),
+                        p['servicio__nombre'],
+                        'Servicio',
+                        int(p['cantidads__sum']),
+                        format(p['servicio__pvp'], '.2f'),
+                        format(p['servicio__pvp'] * p['cantidads__sum'], '.2f'),
+                    ])
+        else:
+            if start_date == '' and end_date == '':
+                query = Detalle_venta.objects.values('venta__fecha_venta', 'producto__nombre', 'servicio__nombre',
+                                                     'servicio__pvp', 'producto__pvp').order_by(). \
+                    annotate(Sum('cantidadp')).annotate(Sum('cantidads'))
+                for p in query:
+                    data.append([
+                        p['venta__fecha_venta'].strftime("%d/%m/%Y"),
+                        p['producto__nombre'],
+                        'Producto',
+                        int(p['cantidadp__sum']),
+                        format(p['producto__pvp'], '.2f'),
+                        format(p['producto__pvp'] * p['cantidadp__sum'], '.2f'),
+                    ])
+                    data.append([
+                        p['venta__fecha_venta'].strftime("%d/%m/%Y"),
+                        p['servicio__nombre'],
+                        'Servicio',
+                        int(p['cantidads__sum']),
+                        format(p['servicio__pvp'], '.2f'),
+                        format(p['servicio__pvp'] * p['cantidads__sum'], '.2f'),
+                    ])
+            else:
+                query = Detalle_venta.objects.values('venta__fecha_venta', 'producto__nombre', 'servicio__nombre',
+                                                     'servicio__pvp', 'producto__pvp') \
+                    .filter(venta__fecha_venta__range=[start_date, end_date]).order_by().annotate(Sum('cantidadp')). \
+                    annotate(Sum('cantidads'))
+                for p in query:
+                    data.append([
+                        p['venta__fecha_venta'].strftime("%d/%m/%Y"),
+                        p['producto__nombre'],
+                        'Producto',
+                        int(p['cantidadp__sum']),
+                        format(p['producto__pvp'], '.2f'),
+                        format(p['producto__pvp'] * p['cantidadp__sum'], '.2f'),
+                    ])
+                    data.append([
+                        p['venta__fecha_venta'].strftime("%d/%m/%Y"),
+                        p['servicio__nombre'],
+                        'Servicio',
+                        int(p['cantidads__sum']),
+                        format(p['servicio__pvp'], '.2f'),
+                        format(p['servicio__pvp'] * p['cantidads__sum'], '.2f'),
+                    ])
+    except:
+        pass
+    return JsonResponse(data, safe=False)
+
+
+class report(ListView):
+    model = Venta
+    template_name = 'front-end/venta/venta_report_product.html'
+
+    def get_queryset(self):
+        return Venta.objects.none()
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['icono'] = opc_icono
+        data['entidad'] = opc_entidad
+        data['boton'] = 'Nueva Venta'
+        data['titulo'] = 'Listado de Ventas'
+        data['nuevo'] = '/venta/nuevo'
+        data['filter_prod'] = '/venta/lista'
+        return data
+
+
+@csrf_exempt
+def data_report_total(request):
+    data = []
+    start_date = request.POST.get('start_date', '')
+    end_date = request.POST.get('end_date', '')
+    try:
+        if start_date == '' and end_date == '':
+            query = Venta.objects.values('fecha_venta', 'cliente__nombres', 'cliente__apellidos', 'empleado__first_name'
+                                         , 'empleado__last_name', 'total')
+            for p in query:
+                data.append([
+                    p['fecha_venta'].strftime("%d/%m/%Y"),
+                    p['cliente__nombres'] + " " + p['cliente__apellidos'],
+                    p['empleado__first_name'] + " " + p['empleado__last_name'],
+                    format(p['total'], '.2f')
+                ])
+        else:
+            query = Venta.objects.values('fecha_venta', 'cliente__nombres', 'cliente__apellidos',
+                                         'empleado__first_name',
+                                         'empleado__last_name', 'total').filter(
+                fecha_venta__range=[start_date, end_date])
+            for p in query:
+                data.append([
+                    p['fecha_venta'].strftime("%d/%m/%Y"),
+                    p['cliente__nombres'] + " " + p['cliente__apellidos'],
+                    p['empleado__first_name'] + " " + p['empleado__last_name'],
+                    format(p['total'], '.2f')
+                ])
+    except:
+        pass
+    return JsonResponse(data, safe=False)
+
+
+class report_total(ListView):
+    model = Venta
+    template_name = 'front-end/venta/venta_report_total.html'
+
+    def get_queryset(self):
+        return Venta.objects.none()
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['icono'] = opc_icono
+        data['entidad'] = opc_entidad
+        data['boton'] = 'Nueva Venta'
+        data['titulo'] = 'Listado de Ventas'
+        data['nuevo'] = '/venta/nuevo'
+        data['filter_prod'] = '/venta/lista'
+        return data

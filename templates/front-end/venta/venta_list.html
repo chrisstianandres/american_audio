@@ -1,5 +1,15 @@
 {% extends 'front-end/list.html' %}
 {% load static %}
+{% block elements %}
+    <br>
+    <div class="row">
+        <div class="col-lg-4">
+            <label for="fecha"><strong>Rango de Fechas:</strong></label>
+            <input type="text" name="fecha" id="fecha" class="form-control form-control-sm input-sm">
+        </div>
+    </div>
+    <br>
+{% endblock %}
 {% block table %}
     <thead>
     <tr>
@@ -13,6 +23,7 @@
     </tr>
     </thead>
     <tbody>
+
 
     </tbody>
 {% endblock %}

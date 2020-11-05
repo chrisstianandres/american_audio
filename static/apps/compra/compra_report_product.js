@@ -14,7 +14,7 @@ toDataURL('/media/logo_don_chuta.png').then(dataUrl => {
 var datos = {
     fechas: {
         'start_date': '',
-        'end_date': ''
+        'end_date': '',
     },
     add: function (data) {
         if (data.key === 1) {
@@ -24,8 +24,9 @@ var datos = {
             this.fechas['start_date'] = '';
             this.fechas['end_date'] = '';
         }
+
         $.ajax({
-            url: '/compra/data',
+            url: '/compra/data_report',
             type: 'POST',
             data: this.fechas,
             success: function (data) {
@@ -36,16 +37,15 @@ var datos = {
 
     },
 };
-
-
 $(function () {
     daterange();
     datatable = $("#datatable").DataTable({
         destroy: true,
         scrollX: true,
         autoWidth: false,
+        order: [[2, "asc"]],
         ajax: {
-            url: '/compra/data',
+            url: '/compra/data_report',
             type: 'POST',
             data: datos.fechas,
             dataSrc: ""
@@ -63,10 +63,12 @@ $(function () {
                     0: 'Ningun Filtro seleccionado',
                 },
                 activeMessage: 'Filtros activos (%d)',
+                emptyPanes: 'There are no panes to display. :/',
+                sZeroRecords: "No se encontraron resultados",
 
             }
         },
-        order: [[4, "desc"]],
+
         dom: 'l<"toolbar">' + "<br>" + 'Bfrtip ',
         buttons: [
             {
@@ -79,15 +81,16 @@ $(function () {
                 }
             },
             {
-                text: '<i class="fa fa-file-pdf"></i> Reporte PDF',
-                className: 'btn btn-danger my_class',
+                text: '<i class="far fa-file-pdf"></i> Reporte PDF</i>',
+                className: 'btn btn-danger',
                 extend: 'pdfHtml5',
+                footer: true,
                 //filename: 'dt_custom_pdf',
                 orientation: 'landscape', //portrait
                 pageSize: 'A4', //A3 , A5 , A6 , legal , letter
                 download: 'open',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5],
+                    columns: [0, 1, 2, 3, 4],
                     search: 'applied',
                     order: 'applied'
                 },
@@ -102,7 +105,7 @@ $(function () {
                         var dd = (date.getDate() < 10 ? '0' : '') + date.getDate();
                         // 01, 02, 03, ... 10, 11, 12
                         // month < 10 ? '0' + month : '' + month; // ('' + month) for string result
-                        var MM = monthNames[date.getMonth() + 1]; //monthNames[d.getMonth()])
+                        var MM = monthNames[date.getMonth()]; //monthNames[d.getMonth()])
                         // 1970, 1971, ... 2015, 2016, ...
                         var yyyy = date.getFullYear();
                         // create the format you want
@@ -156,15 +159,24 @@ $(function () {
                         return 4;
                     };
                     doc.content[0].layout = objLayout;
-                    doc.content[1].table.widths = ['*', '*', '*', '*', '*', '*'];
+                    doc.content[1].table.widths = ["*", "*", "*", "*", "*"];
                     doc.styles.tableBodyEven.alignment = 'center';
                     doc.styles.tableBodyOdd.alignment = 'center';
+                    doc.styles.tableFooter.alignment = 'center';
                 }
             },
             {
-                text: '<i class="fa fa-file-excel"></i> Reporte Excel', className: "btn btn-success my_class",
-                extend: 'excel'
-            }
+                text: '<i class="far fa-file-excel"></i> Reporte Excel</i>', className: "btn btn-success my_class",
+                extend: 'excel',
+                footer: true
+            },
+            {
+                text: '<i class="fas fa-funnel-dollar"></i> Reporte por Totales</i>',
+                className: 'btn-primary my_class',
+                action: function (e, dt, node, config) {
+                    window.location.href = '/compra/report_total'
+                }
+            },
         ],
         columnDefs: [
             {
@@ -177,27 +189,64 @@ $(function () {
                 searchPanes: {
                     show: true,
                 },
-                targets: [1, 2, 4],
+                targets: [1],
             },
+
             {
                 searchPanes: {
                     show: true,
                     options: [
                         {
-                            label: 'FINALIZADA',
+                            label: 'Menos de  10',
                             value: function (rowData, rowIdx) {
-                                return rowData[5] === 'FINALIZADA';
+                                return rowData[2] < 10;
                             }
                         },
                         {
-                            label: 'DEVUELTA',
+                            label: ' 10 a  50',
                             value: function (rowData, rowIdx) {
-                                return rowData[5] === 'DEVUELTA';
+                                return rowData[2] <= 50 && rowData[2] >= 10;
+                            }
+                        },
+                        {
+                            label: ' 50 a  100',
+                            value: function (rowData, rowIdx) {
+                                return rowData[2] <= 100 && rowData[2] >= 50;
+                            }
+                        },
+                        {
+                            label: ' 100 a  200',
+                            value: function (rowData, rowIdx) {
+                                return rowData[2] <= 200 && rowData[2] >= 100;
+                            }
+                        },
+                        {
+                            label: '200 a 300',
+                            value: function (rowData, rowIdx) {
+                                return rowData[2] <= 300 && rowData[2] >= 200;
+                            }
+                        },
+                        {
+                            label: ' 300 a  400',
+                            value: function (rowData, rowIdx) {
+                                return rowData[2] <= 400 && rowData[2] >= 300;
+                            }
+                        },
+                        {
+                            label: ' 400 a  500',
+                            value: function (rowData, rowIdx) {
+                                return rowData[2] <= 500 && rowData[2] >= 400;
+                            }
+                        },
+                        {
+                            label: 'Mas de  500',
+                            value: function (rowData, rowIdx) {
+                                return rowData[2] > 500;
                             }
                         },
                     ]
                 },
-                targets: [5],
+                targets: [2],
             },
             {
                 searchPanes: {
@@ -256,115 +305,126 @@ $(function () {
                 targets: [3],
             },
             {
+                searchPanes: {
+                    show: true,
+                    options: [
+                        {
+                            label: 'Menos de $ 10',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] < 10;
+                            }
+                        },
+                        {
+                            label: '$ 10 a $ 50',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] <= 50 && rowData[4] >= 10;
+                            }
+                        },
+                        {
+                            label: '$ 50 a $ 100',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] <= 100 && rowData[4] >= 50;
+                            }
+                        },
+                        {
+                            label: '$ 100 a $ 200',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] <= 200 && rowData[4] >= 100;
+                            }
+                        },
+                        {
+                            label: '$ 200 a $ 300',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] <= 300 && rowData[4] >= 200;
+                            }
+                        },
+                        {
+                            label: '$ 300 a $ 400',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] <= 400 && rowData[4] >= 300;
+                            }
+                        },
+                        {
+                            label: '$ 400 a $ 500',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] <= 500 && rowData[4] >= 400;
+                            }
+                        },
+                        {
+                            label: 'Mas de $ 500',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] > 500;
+                            }
+                        },
+                    ]
+                },
+                targets: [4],
+            },
+            {
                 targets: '_all',
                 class: 'text-center',
 
             },
             {
-                targets: [-1],
-                class: 'text-center',
-                width: "15%",
-                render: function (data, type, row) {
-                    var detalle = '<a type="button" rel="detalle" class="btn btn-success btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Detalle de Productos" ><i class="fa fa-search"></i></a>' + ' ';
-                    var devolver = '<a type="button" rel="devolver" class="btn btn-danger btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Devolver"><i class="fa fa-times"></i></a>' + ' ';
-                    var pdf = '<a type="button" href= "/compra/printpdf/' + row[4] + '" rel="pdf" class="btn btn-primary btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Reporte PDF"><i class="fa fa-file-pdf"></i></a>';
-                    return detalle + devolver + pdf;
-                }
-            },
-            {
                 targets: [-2],
+                class: 'text-center',
+                orderable: false,
                 render: function (data, type, row) {
-                    return '<span>' + data + '</span>';
+                    return '$ ' + data;
                 }
             },
             {
-                targets: [-3],
-                render: function (data, type, row) {
-                    return pad(data, 10);
-                }
-            },
-            {
-                targets: [-4],
+                targets: [-1],
+                width: '20%',
                 render: function (data, type, row) {
                     return '$ ' + data;
                 }
             },
         ],
-        createdRow: function (row, data, dataIndex) {
-            if (data[5] === 'FINALIZADA') {
-                $('td', row).eq(5).find('span').addClass('badge bg-success').attr("style", "color: white");;
-            } else if (data[5] === 'DEVUELTA') {
-                $('td', row).eq(5).find('span').addClass('badge bg-important').attr("style", "color: white");;
-                $('td', row).eq(6).find('a[rel="devolver"]').hide();
-                $('td', row).eq(6).find('a[rel="pdf"]').hide();
-            }
+        footerCallback: function (row, data, start, end, display) {
+            var api = this.api(), data;
 
-        }
+            // Remove the formatting to get integer data for summation
+            var intVal = function (i) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '') * 1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+            // Total over this page
+            pageTotal = api
+                .column(4, {page: 'current'})
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            total = api.column(4).data().reduce(function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0);
+
+            cantTotal = api
+                .column(2, {page: 'current'})
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+
+            // Update footer
+            $(api.column(4).footer()).html(
+                '$' + parseFloat(pageTotal).toFixed(2) + '( $ ' + parseFloat(total).toFixed(2) + ')'
+                // parseFloat(data).toFixed(2)
+            );
+            $(api.column(2).footer()).html(
+                cantTotal
+                // parseFloat(data).toFixed(2)
+            );
+        },
+
     });
-    $('#datatable tbody').on('click', 'a[rel="devolver"]', function () {
-        $('.tooltip').remove();
-        var tr = datatable.cell($(this).closest('td, li')).index();
-        var data = datatable.row(tr.row).data();
-        var parametros = {'id': data['3']};
-        save_estado('Alerta',
-            '/compra/estado', 'Esta seguro que desea devolver esta compra?', parametros,
-            function () {
-                menssaje_ok('Exito!', 'Exito al devolver la compra', 'far fa-smile-wink', function () {
-                    location.reload();
-                })
-            });
-
-    })
-        .on('click', 'a[rel="detalle"]', function () {
-            $('.tooltip').remove();
-            var tr = datatable.cell($(this).closest('td, li')).index();
-            var data = datatable.row(tr.row).data();
-            $('#Modal').modal('show');
-            $("#tbldetalle_insumos").DataTable({
-                responsive: true,
-                autoWidth: false,
-                language: {
-                    "url": '//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json'
-                },
-                destroy: true,
-                ajax: {
-                    url: '/compra/get_detalle',
-                    type: 'Post',
-                    data: {
-                        'id': data['4']
-                    },
-                    dataSrc: ""
-                },
-                columns: [
-                    {data: 'producto.nombre'},
-                    {data: 'producto.categoria.nombre'},
-                    {data: 'producto.presentacion.nombre'},
-                    {data: 'cantidad'},
-                    {data: 'producto.pvp'},
-                    {data: 'subtotal'}
-                ],
-                columnDefs: [
-                    {
-                        targets: [3],
-                        class: 'text-center'
-                    },
-                    {
-                        targets: [-1, -2],
-                        class: 'text-center',
-                        orderable: false,
-                        render: function (data, type, row) {
-                            return '$' + parseFloat(data).toFixed(2);
-                        }
-                    },
-                ],
-            });
-
-        });
-
-
 });
 
 function daterange() {
+    // $("div.toolbar").html('<br><div class="col-lg-3"><input type="text" name="fecha" class="form-control form-control-sm input-sm"></div> <br>');
     $('input[name="fecha"]').daterangepicker({
         locale: {
             format: 'YYYY-MM-DD',
@@ -379,12 +439,6 @@ function daterange() {
     }).on('cancel.daterangepicker', function (ev, picker) {
         picker['key'] = 0;
         datos.add(picker);
-
     });
 
-}
-
-function pad(str, max) {
-    str = str.toString();
-    return str.length < max ? pad("0" + str, max) : str;
 }
