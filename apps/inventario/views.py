@@ -7,12 +7,14 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import ListView
 
 from apps.backEnd import nombre_empresa
 from apps.cliente.forms import ClienteForm
 from apps.cliente.models import Cliente
 from apps.empleado.models import Empleado
 from apps.inventario.models import Inventario
+from apps.producto.models import Producto
 from apps.proveedor.models import Proveedor
 
 opc_icono = 'fas fa-warehouse'
@@ -21,31 +23,72 @@ crud = '/inventario/crear'
 empresa = nombre_empresa()
 
 
-def cliente_lista(request):
-    data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'empresa': empresa,
-        'boton': 'Nuevo Cliente', 'titulo': 'Listado de Clientes',
-        'nuevo': '/cliente/nuevo'
-    }
-    list = Cliente.objects.all()
-    data['list'] = list
-    return render(request, "front-end/cliente/cliente_list.html", data)
+class lista(ListView):
+    model = Inventario
+    template_name = 'front-end/inventario/inventario_list.html'
+
+    def get_queryset(self):
+        return Inventario.objects.none()
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['icono'] = opc_icono
+        data['entidad'] = opc_entidad
+        data['titulo'] = 'Reporte  de Inventario'
+        data['empresa'] = empresa
+        return data
 
 
 @csrf_exempt
 def data(request):
-    data = {}
+    data = []
+    start_date = request.POST.get('start_date', '')
+    end_date = request.POST.get('end_date', '')
+    venta = ''
+    estado = ''
     try:
-        data = []
-        term = request.POST['term']
-        query = Cliente.objects.filter(
-            Q(nombres__icontains=term) | Q(apellidos__icontains=term) | Q(cedula__icontains=term))[0:10]
-        for a in query:
-            item = a.toJSON()
-            item['text'] = a.get_full_name()
-            data.append(item)
-    except Exception as e:
-        data['error'] = str(e)
+        if start_date == '' and end_date == '':
+            compra = Inventario.objects.all()
+            for c in compra:
+                if c.venta == None:
+                    venta = 'No vendido'
+                    estado = 'En Stock'
+                else:
+                    venta = c.venta.fecha_venta
+                    estado = 'Vendido'
+                data.append([
+                    c.id,
+                    c.compra.fecha_compra.strftime('%d-%m-%Y'),
+                    venta,
+                    c.producto.nombre,
+                    c.producto.categoria.nombre,
+                    c.producto.presentacion.nombre,
+                    c.serie,
+                    estado
+                ])
+        else:
+            compra = Inventario.objects.filter(Q(compra__fecha_compra__range=[start_date, end_date]) |
+                                               Q(venta__fecha_venta__range=[start_date, end_date]))
+            for c in compra:
+                if c.venta == None:
+                    venta = 'No vendido'
+                    estado = 'En Stock'
+                else:
+                    venta = c.venta.fecha_venta
+                    estado = 'Vendido'
+                data.append([
+                    c.id,
+                    c.compra.fecha_compra.strftime('%d-%m-%Y'),
+                    venta,
+                    c.producto.nombre,
+                    c.producto.categoria.nombre,
+                    c.producto.presentacion.nombre,
+                    c.serie,
+                    estado,
+                    c.id
+                ])
+    except:
+        pass
     return JsonResponse(data, safe=False)
 
 
@@ -91,65 +134,16 @@ def crear(request):
 
 
 @csrf_exempt
-def crearcli(request):
-    data = {}
-    try:
-        if request.method == 'POST':
-            if Proveedor.objects.filter(documento=0, numero_documento=request.POST['cedula']):
-                data['error'] = 'Numero de Cedula ya exitente en los Proveedores'
-            elif Empleado.objects.filter(cedula=request.POST['cedula']):
-                data['error'] = 'Numero de Cedula ya exitente en los Empleados'
-            elif verificar(request.POST['cedula']):
-                with transaction.atomic():
-                    f = ClienteForm(request.POST)
-                    if f.is_valid():
-                        var = f.save()
-                        data['resp'] = True
-                        data['cliente'] = var.toJSON()
-                        return JsonResponse(data)
-                    else:
-                        errores = []
-                        c = '\n'
-                        for a in f.errors:
-                            errores.append('El campo ' + a + ' esta ya existe <br/>')
-                        data['error'] = errores
-            else:
-                data['error'] = 'Numero de Cedula no valido para Ecuador'
-    except Exception as e:
-        gs = goslate.Goslate()
-        data['error'] = gs.translate(str(e), 'es')
-    return JsonResponse(data)
-
-
-def editar(request, id):
-    cargo = Cliente.objects.get(id=id)
-    crud = '/cliente/editar/' + str(id)
-    data = {
-        'icono': opc_icono, 'crud': crud, 'entidad': opc_entidad, 'empresa': empresa,
-        'boton': 'Guardar Edicion', 'titulo': 'Editar Registro de un Cliente',
-        'option': 'editar'
-    }
-    if request.method == 'GET':
-        form = ClienteForm(instance=cargo)
-        data['form'] = form
-    else:
-        form = ClienteForm(request.POST, instance=cargo)
-        if form.is_valid():
-            form.save()
-        else:
-            data['form'] = form
-        return HttpResponseRedirect('/cliente/lista')
-    return render(request, 'front-end/cliente/cliente_form.html', data)
-
-
-@csrf_exempt
 def eliminar(request):
     data = {}
     try:
         id = request.POST['id']
         if id:
-            ps = Cliente.objects.get(pk=id)
+            ps = Inventario.objects.get(pk=id)
             ps.delete()
+            x = Producto.objects.get(pk=ps.producto.id)
+            x.stock = x.stock - 1
+            x.save()
             data['resp'] = True
         else:
             data['error'] = 'Ha ocurrido un error'
@@ -157,56 +151,3 @@ def eliminar(request):
         data['error'] = 'No se puede eliminar este cliente porque esta referenciado en otros procesos'
         data['content'] = 'Intenta con otro cliente'
     return JsonResponse(data)
-
-
-def verificar(nro):
-    error = ''
-    l = len(nro)
-    if l == 10 or l == 13:  # verificar la longitud correcta
-        cp = int(nro[0:2])
-        if cp >= 1 and cp <= 22:  # verificar codigo de provincia
-            tercer_dig = int(nro[2])
-            if tercer_dig >= 0 and tercer_dig < 6:  # numeros enter 0 y 6
-                if l == 10:
-                    return __validar_ced_ruc(nro, 0)
-                elif l == 13:
-                    return __validar_ced_ruc(nro, 0) and nro[
-                                                         10:13] != '000'  # se verifica q los ultimos numeros no sean 000
-            elif tercer_dig == 6:
-                return __validar_ced_ruc(nro, 1)  # sociedades publicas
-            elif tercer_dig == 9:  # si es ruc
-                return __validar_ced_ruc(nro, 2)  # sociedades privadas
-            else:
-                error = 'Tercer digito invalido'
-                return False and error
-        else:
-            error = 'Codigo de provincia incorrecto'
-            return False and error
-    else:
-        error = 'Longitud incorrecta del numero ingresado'
-        return False and error
-
-
-def __validar_ced_ruc(nro, tipo):
-    total = 0
-    if tipo == 0:  # cedula y r.u.c persona natural
-        base = 10
-        d_ver = int(nro[9])  # digito verificador
-        multip = (2, 1, 2, 1, 2, 1, 2, 1, 2)
-    elif tipo == 1:  # r.u.c. publicos
-        base = 11
-        d_ver = int(nro[8])
-        multip = (3, 2, 7, 6, 5, 4, 3, 2)
-    elif tipo == 2:  # r.u.c. juridicos y extranjeros sin cedula
-        base = 11
-        d_ver = int(nro[9])
-        multip = (4, 3, 2, 7, 6, 5, 4, 3, 2)
-    for i in range(0, len(multip)):
-        p = int(nro[i]) * multip[i]
-        if tipo == 0:
-            total += p if p < 10 else int(str(p)[0]) + int(str(p)[1])
-        else:
-            total += p
-    mod = total % base
-    val = base - mod if mod != 0 else 0
-    return val == d_ver
