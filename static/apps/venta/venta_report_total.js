@@ -43,7 +43,7 @@ $(function () {
         destroy: true,
         scrollX: true,
         autoWidth: false,
-        order: [[ 2, "asc" ]],
+        order: [[2, "asc"]],
         ajax: {
             url: '/venta/data_report_total',
             type: 'POST',
@@ -69,7 +69,7 @@ $(function () {
             }
         },
 
-        dom: 'l<"toolbar">'+"<br>"+'Bfrtip ',
+        dom: 'l<"toolbar">' + "<br>" + 'Bfrtip ',
         //"<'row'<'col-md-6'l><'col-md-6'Bf>>"
         buttons: [
             {
@@ -91,7 +91,7 @@ $(function () {
                 pageSize: 'A4', //A3 , A5 , A6 , legal , letter
                 download: 'open',
                 exportOptions: {
-                    columns: [0, 1, 2, 3],
+                    columns: [0, 1, 2, 3, 4, 5],
                     search: 'applied',
                     order: 'applied'
                 },
@@ -160,7 +160,7 @@ $(function () {
                         return 4;
                     };
                     doc.content[0].layout = objLayout;
-                    doc.content[1].table.widths = ["*", "*", "*", "*"];
+                    doc.content[1].table.widths = ["*", "*", "*", "*", "*", "*"];
                     doc.styles.tableBodyEven.alignment = 'center';
                     doc.styles.tableBodyOdd.alignment = 'center';
                     doc.styles.tableFooter.alignment = 'center';
@@ -256,6 +256,118 @@ $(function () {
                 targets: [3],
             },
             {
+                searchPanes: {
+                    show: true,
+                    options: [
+                        {
+                            label: 'Menos de $ 10',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] < 10;
+                            }
+                        },
+                        {
+                            label: '$ 10 a $ 50',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] <= 50 && rowData[4] >= 10;
+                            }
+                        },
+                        {
+                            label: '$ 50 a $ 100',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] <= 100 && rowData[4] >= 50;
+                            }
+                        },
+                        {
+                            label: '$ 100 a $ 200',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] <= 200 && rowData[4] >= 100;
+                            }
+                        },
+                        {
+                            label: '$ 200 a $ 300',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] <= 300 && rowData[4] >= 200;
+                            }
+                        },
+                        {
+                            label: '$ 300 a $ 400',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] <= 400 && rowData[4] >= 300;
+                            }
+                        },
+                        {
+                            label: '$ 400 a $ 500',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] <= 500 && rowData[4] >= 400;
+                            }
+                        },
+                        {
+                            label: 'Mas de $ 500',
+                            value: function (rowData, rowIdx) {
+                                return rowData[4] > 500;
+                            }
+                        },
+                    ]
+                },
+                targets: [4],
+            },
+            {
+                searchPanes: {
+                    show: true,
+                    options: [
+                        {
+                            label: 'Menos de $ 10',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] < 10;
+                            }
+                        },
+                        {
+                            label: '$ 10 a $ 50',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] <= 50 && rowData[5] >= 10;
+                            }
+                        },
+                        {
+                            label: '$ 50 a $ 100',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] <= 100 && rowData[5] >= 50;
+                            }
+                        },
+                        {
+                            label: '$ 100 a $ 200',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] <= 200 && rowData[5] >= 100;
+                            }
+                        },
+                        {
+                            label: '$ 200 a $ 300',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] <= 300 && rowData[5] >= 200;
+                            }
+                        },
+                        {
+                            label: '$ 300 a $ 400',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] <= 400 && rowData[5] >= 300;
+                            }
+                        },
+                        {
+                            label: '$ 400 a $ 500',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] <= 500 && rowData[5] >= 400;
+                            }
+                        },
+                        {
+                            label: 'Mas de $ 500',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] > 500;
+                            }
+                        },
+                    ]
+                },
+                targets: [5],
+            },
+            {
                 targets: '_all',
                 class: 'text-center',
 
@@ -265,6 +377,12 @@ $(function () {
                 width: '20%',
                 render: function (data, type, row) {
                     return '$ ' + data;
+                }
+            },
+            {
+                targets: [-2, -3],
+                render: function (data, type, row) {
+                    return '$ ' + parseFloat(data).toFixed(2);
                 }
             },
         ],
@@ -279,20 +397,52 @@ $(function () {
                         i : 0;
             };
             // Total over this page
-            pageTotal = api
+            pageTotalsiniva = api
                 .column(3, {page: 'current'})
                 .data()
                 .reduce(function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0);
             // total full table
-            total = api.column( 3 ).data().reduce( function (a, b) {
-                         return intVal(a) + intVal(b);
-                         }, 0 );
+            pageTotalsiniva = api.column(3).data().reduce(function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0);
+
+            // Total over this page
+            pageTotaliva = api
+                .column(4, {page: 'current'})
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            // total full table
+            totaliva = api.column(4).data().reduce(function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0);
+// Total over this page
+            pageTotalconiva = api
+                .column(5, {page: 'current'})
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            // total full table
+            totalconiva = api.column(5).data().reduce(function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0);
+
 
             // Update footer
             $(api.column(3).footer()).html(
-                '$ ' + parseFloat(pageTotal).toFixed(2) + ' ( $ '+parseFloat(total).toFixed(2)+')'
+                '$ ' + parseFloat(pageTotalsiniva).toFixed(2) + ' ( $ ' + parseFloat(pageTotalsiniva).toFixed(2) + ')'
+                // parseFloat(data).toFixed(2)
+            );
+             $(api.column(4).footer()).html(
+                '$ ' + parseFloat(pageTotaliva).toFixed(2) + ' ( $ ' + parseFloat(pageTotaliva).toFixed(2) + ')'
+                // parseFloat(data).toFixed(2)
+            );
+              $(api.column(5).footer()).html(
+                '$ ' + parseFloat(pageTotalconiva).toFixed(2) + ' ( $ ' + parseFloat(pageTotalconiva).toFixed(2) + ')'
                 // parseFloat(data).toFixed(2)
             );
         },

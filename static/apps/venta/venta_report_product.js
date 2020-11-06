@@ -104,7 +104,7 @@ $(function () {
                 pageSize: 'A4', //A3 , A5 , A6 , legal , letter
                 download: 'open',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5],
+                    columns: [0, 1, 2, 3, 4, 5, 6, 7],
                     search: 'applied',
                     order: 'applied'
                 },
@@ -173,7 +173,7 @@ $(function () {
                         return 4;
                     };
                     doc.content[0].layout = objLayout;
-                    doc.content[1].table.widths = ["*", "*", "*", "*", "*", "*"];
+                    doc.content[1].table.widths = ["*", "*", "*", "*", "*","*","*", "*"];
                     doc.styles.tableBodyEven.alignment = 'center';
                     doc.styles.tableBodyOdd.alignment = 'center';
                     doc.styles.tableFooter.alignment = 'center';
@@ -197,7 +197,7 @@ $(function () {
                 searchPanes: {
                     show: true,
                 },
-                targets: [1],
+                targets: [1, 2],
             },
             {
                 searchPanes: {
@@ -206,105 +206,25 @@ $(function () {
                         {
                             label: 'Menos de  10',
                             value: function (rowData, rowIdx) {
-                                return rowData[2] < 10;
+                                return rowData[3] < 10;
                             }
                         },
                         {
                             label: ' 10 a  50',
                             value: function (rowData, rowIdx) {
-                                return rowData[2] <= 50 && rowData[2] >= 10;
+                                return rowData[3] <= 50 && rowData[3] >= 10;
                             }
                         },
                         {
                             label: ' 50 a  100',
                             value: function (rowData, rowIdx) {
-                                return rowData[2] <= 100 && rowData[2] >= 50;
-                            }
-                        },
-                        {
-                            label: ' 100 a  200',
-                            value: function (rowData, rowIdx) {
-                                return rowData[2] <= 200 && rowData[2] >= 100;
-                            }
-                        },
-                        {
-                            label: '200 a 300',
-                            value: function (rowData, rowIdx) {
-                                return rowData[2] <= 300 && rowData[2] >= 200;
-                            }
-                        },
-                        {
-                            label: ' 300 a  400',
-                            value: function (rowData, rowIdx) {
-                                return rowData[2] <= 400 && rowData[2] >= 300;
-                            }
-                        },
-                        {
-                            label: ' 400 a  500',
-                            value: function (rowData, rowIdx) {
-                                return rowData[2] <= 500 && rowData[2] >= 400;
-                            }
-                        },
-                        {
-                            label: 'Mas de  500',
-                            value: function (rowData, rowIdx) {
-                                return rowData[2] > 500;
-                            }
-                        },
-                    ]
-                },
-                targets: [2],
-            },
-            {
-                searchPanes: {
-                    show: true,
-                    options: [
-                        {
-                            label: 'Menos de $ 10',
-                            value: function (rowData, rowIdx) {
-                                return rowData[3] < 10;
-                            }
-                        },
-                        {
-                            label: '$ 10 a $ 50',
-                            value: function (rowData, rowIdx) {
-                                return rowData[3] <= 50 && rowData[3] >= 10;
-                            }
-                        },
-                        {
-                            label: '$ 50 a $ 100',
-                            value: function (rowData, rowIdx) {
                                 return rowData[3] <= 100 && rowData[3] >= 50;
                             }
                         },
                         {
-                            label: '$ 100 a $ 200',
+                            label: 'Mas de 100',
                             value: function (rowData, rowIdx) {
-                                return rowData[3] <= 200 && rowData[3] >= 100;
-                            }
-                        },
-                        {
-                            label: '$ 200 a $ 300',
-                            value: function (rowData, rowIdx) {
-                                return rowData[3] <= 300 && rowData[3] >= 200;
-                            }
-                        },
-                        {
-                            label: '$ 300 a $ 400',
-                            value: function (rowData, rowIdx) {
-                                return rowData[3] <= 400 && rowData[3] >= 300;
-                            }
-                        },
-                        {
-                            label: '$ 400 a $ 500',
-                            value: function (rowData, rowIdx) {
-                                return rowData[3] <= 500 && rowData[3] >= 400;
-                            }
-                        },
-                        {
-                            label: 'Mas de $ 500',
-                            value: function (rowData, rowIdx) {
-                                return rowData[3] > 500;
+                                return rowData[3] > 100;
                             }
                         },
                     ]
@@ -366,6 +286,174 @@ $(function () {
                     ]
                 },
                 targets: [4],
+            },
+            {
+                searchPanes: {
+                    show: true,
+                    options: [
+                        {
+                            label: 'Menos de  $ 10',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] < 10;
+                            }
+                        },
+                        {
+                            label: '$ 10 a $ 50',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] <= 50 && rowData[5] >= 10;
+                            }
+                        },
+                        {
+                            label: '$ 50 a $ 100',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] <= 100 && rowData[5] >= 50;
+                            }
+                        },
+                        {
+                            label: '$ 100 a $ 200',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] <= 200 && rowData[5] >= 100;
+                            }
+                        },
+                        {
+                            label: '$200 a  $ 300',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] <= 300 && rowData[5] >= 200;
+                            }
+                        },
+                        {
+                            label: '$ 300 a $ 400',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] <= 400 && rowData[5] >= 300;
+                            }
+                        },
+                        {
+                            label: '$ 400 a $ 500',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] <= 500 && rowData[5] >= 400;
+                            }
+                        },
+                        {
+                            label: 'Mas de  $ 500',
+                            value: function (rowData, rowIdx) {
+                                return rowData[5] > 500;
+                            }
+                        },
+                    ]
+                },
+                targets: [5],
+            },
+            {
+                searchPanes: {
+                    show: true,
+                    options: [
+                        {
+                            label: 'Menos de  $ 10',
+                            value: function (rowData, rowIdx) {
+                                return rowData[6] < 10;
+                            }
+                        },
+                        {
+                            label: '$ 10 a $ 50',
+                            value: function (rowData, rowIdx) {
+                                return rowData[6] <= 50 && rowData[6] >= 10;
+                            }
+                        },
+                        {
+                            label: '$ 50 a $ 100',
+                            value: function (rowData, rowIdx) {
+                                return rowData[6] <= 100 && rowData[6] >= 50;
+                            }
+                        },
+                        {
+                            label: '$ 100 a $ 200',
+                            value: function (rowData, rowIdx) {
+                                return rowData[6] <= 200 && rowData[6] >= 100;
+                            }
+                        },
+                        {
+                            label: '$200 a  $ 300',
+                            value: function (rowData, rowIdx) {
+                                return rowData[6] <= 300 && rowData[6] >= 200;
+                            }
+                        },
+                        {
+                            label: '$ 300 a $ 400',
+                            value: function (rowData, rowIdx) {
+                                return rowData[6] <= 400 && rowData[6] >= 300;
+                            }
+                        },
+                        {
+                            label: '$ 400 a $ 500',
+                            value: function (rowData, rowIdx) {
+                                return rowData[6] <= 500 && rowData[6] >= 400;
+                            }
+                        },
+                        {
+                            label: 'Mas de  $ 500',
+                            value: function (rowData, rowIdx) {
+                                return rowData[6] > 500;
+                            }
+                        },
+                    ]
+                },
+                targets: [6],
+            },
+            {
+                searchPanes: {
+                    show: true,
+                    options: [
+                        {
+                            label: 'Menos de  $ 10',
+                            value: function (rowData, rowIdx) {
+                                return rowData[7] < 10;
+                            }
+                        },
+                        {
+                            label: '$ 10 a $ 50',
+                            value: function (rowData, rowIdx) {
+                                return rowData[7] <= 50 && rowData[7] >= 10;
+                            }
+                        },
+                        {
+                            label: '$ 50 a $ 100',
+                            value: function (rowData, rowIdx) {
+                                return rowData[7] <= 100 && rowData[7] >= 50;
+                            }
+                        },
+                        {
+                            label: '$ 100 a $ 200',
+                            value: function (rowData, rowIdx) {
+                                return rowData[7] <= 200 && rowData[7] >= 100;
+                            }
+                        },
+                        {
+                            label: '$200 a  $ 300',
+                            value: function (rowData, rowIdx) {
+                                return rowData[7] <= 300 && rowData[7] >= 200;
+                            }
+                        },
+                        {
+                            label: '$ 300 a $ 400',
+                            value: function (rowData, rowIdx) {
+                                return rowData[7] <= 400 && rowData[7] >= 300;
+                            }
+                        },
+                        {
+                            label: '$ 400 a $ 500',
+                            value: function (rowData, rowIdx) {
+                                return rowData[7] <= 500 && rowData[7] >= 400;
+                            }
+                        },
+                        {
+                            label: 'Mas de  $ 500',
+                            value: function (rowData, rowIdx) {
+                                return rowData[7] > 500;
+                            }
+                        },
+                    ]
+                },
+                targets: [7],
             },
             {
                 targets: '_all',

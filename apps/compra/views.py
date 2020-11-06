@@ -118,10 +118,11 @@ def crear(request):
                     dv.producto_id = i['id']
                     dv.cantidad = int(i['cantidad'])
                     dv.subtotal = int(i['subtotal'])
-                    dv.save()
                     x = Producto.objects.get(pk=i['id'])
                     x.stock = x.stock + int(i['cantidad'])
+                    dv.p_compra_actual = float(x.p_compra)
                     x.save()
+                    dv.save()
                     productos = []
                     for p in range(0, i['cantidad']):
                         item = c.toJSON()
@@ -209,7 +210,6 @@ def get_producto(request):
                 item['subtotal'] = 0.00
                 item['iva_emp'] = iva_emp.iva
                 cal = float(item['p_compra']) / (item['iva_emp'] + 100)
-                print(item['p_compra'])
                 item['p_compra'] = cal
                 data.append(item)
         else:
@@ -228,7 +228,7 @@ def get_detalle(request):
             data = []
             for p in Detalle_compra.objects.filter(compra_id=id):
                 item = p.toJSON()
-                item['p_compra'] = float(p.producto.p_compra) - float(p.compra.iva)
+                item['p_compra'] = float((p.p_compra_actual*100)/(100+empresa.iva))
                 item['subtotal'] = float(p.compra.subtotal)
                 data.append(item)
         else:
@@ -328,11 +328,28 @@ class printpdf(View):
             )
         return path
 
+
+    def pvp_cal(self, *args, **kwargs):
+        data = []
+        try:
+            iva_emp = Empresa.objects.get(pk=1)
+            for i in Detalle_compra.objects.filter(compra_id=self.kwargs['pk']):
+                item = i.compra.toJSON()
+                item['producto'] = i.producto.toJSON()
+                item['pvp'] = format(((i.p_compra_actual * 100) / (iva_emp.iva + 100)), '.2f')
+                item['cantidad'] = i.cantidad
+                item['subtotal'] = i.subtotal
+                data.append(item)
+        except:
+            pass
+        return data
+
     def get(self, request, *args, **kwargs):
         try:
             template = get_template('front-end/report/pdf_compra.html')
             context = {'title': 'Comprobante de Compra',
                        'sale': Compra.objects.get(pk=self.kwargs['pk']),
+                       'det_sale': self.pvp_cal(),
                        'empresa': Empresa.objects.get(id=1),
                        'icon': 'media/logo_don_chuta.png'
                        }
@@ -354,15 +371,14 @@ def data_report(request):
     try:
         if start_date == '' and end_date == '':
             query = Detalle_compra.objects.values('compra__fecha_compra', 'producto__nombre',
-                                                 'producto__pvp').order_by(). \
-                annotate(Sum('cantidad'))
+                                                 'p_compra_actual').order_by().annotate(Sum('cantidad'))
             for p in query:
                 data.append([
                     p['compra__fecha_compra'].strftime("%d/%m/%Y"),
                     p['producto__nombre'],
                     int(p['cantidad__sum']),
-                    format(p['producto__pvp'], '.2f'),
-                    format(p['producto__pvp'] * p['cantidad__sum'], '.2f'),
+                    format(p['p_compra_actual'], '.2f'),
+                    format(p['p_compra_actual'] * p['cantidad__sum'], '.2f'),
                 ])
 
         else:
@@ -395,6 +411,7 @@ class report(ListView):
         data['boton'] = 'Nueva Compra'
         data['titulo'] = 'Reporte de Compras'
         data['nuevo'] = '/compra/nuevo'
+        data['empresa'] = empresa
         data['filter_prod'] = '/compra/report_total'
         return data
 
@@ -406,13 +423,14 @@ def data_report_total(request):
     end_date = request.POST.get('end_date', '')
     try:
         if start_date == '' and end_date == '':
-            query = Compra.objects.values('fecha_compra', 'proveedor__nombres', 'empleado__first_name', 'empleado__last_name', 'total')
+            query = Compra.objects.values('fecha_compra', 'proveedor__nombres', 'empleado__first_name',
+                                          'empleado__last_name').order_by().annotate(Sum('total'))
             for p in query:
                 data.append([
                     p['fecha_compra'].strftime("%d/%m/%Y"),
                     p['proveedor__nombres'],
                     p['empleado__first_name'] + " " + p['empleado__last_name'],
-                    format(p['total'], '.2f')
+                    format(p['total__sum'], '.2f')
                 ])
         else:
             query = Compra.objects.values('fecha_compra', 'proveedor__nombres', 'empleado__first_name',
@@ -444,5 +462,6 @@ class report_total(ListView):
         data['boton'] = 'Nueva Compra'
         data['titulo'] = 'Reporte de Compras Totales'
         data['nuevo'] = '/compra/nuevo'
+        data['empresa'] = empresa
         data['filter_prod'] = '/compra/report_by_product'
         return data

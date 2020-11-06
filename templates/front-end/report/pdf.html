@@ -71,7 +71,7 @@
 </p>
 <table id="invoice">
     <thead>
-    {% for d in sale.detalle_venta_set.all %}
+    {% for d in det_sale %}
         {% if d.producto.id != None %}
             <tr>
                 <th style="width: 40%;"> PRODUCTO</th>
