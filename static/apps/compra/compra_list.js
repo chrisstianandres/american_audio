@@ -340,7 +340,7 @@ $(function () {
                     {data: 'producto.categoria.nombre'},
                     {data: 'producto.presentacion.nombre'},
                     {data: 'cantidad'},
-                    {data: 'producto.pvp'},
+                    {data: 'p_compra'},
                     {data: 'subtotal'}
                 ],
                 columnDefs: [

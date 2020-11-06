@@ -8,7 +8,6 @@ from apps.backEnd import nombre_empresa
 from apps.categoria.forms import CategoriaForm
 from apps.categoria.models import Categoria
 
-
 opc_icono = 'fas fa-boxes'
 opc_entidad = 'Categoria'
 crud = '/categoria/crear'
@@ -41,22 +40,20 @@ def nuevo(request):
 
 
 def crear(request):
-    f = CategoriaForm(request.POST)
     data = {
         'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa': empresa,
         'boton': 'Guardar Categoria', 'action': 'add', 'titulo': 'Nuevo Registro de una Categoria'
     }
     action = request.POST['action']
     data['action'] = action
-    if request.method == 'POST' and 'action' in request.POST:
-        if action == 'add':
-            f = CategoriaForm(request.POST)
-            if f.is_valid():
-                f.save()
-            else:
-                data['form'] = f
-                return render(request, 'front-end/categoria/categoria_form.html', data)
-            return HttpResponseRedirect('/categoria/lista')
+    if request.method == 'POST':
+        f = CategoriaForm(request.POST)
+        if f.is_valid():
+            f.save()
+        else:
+            data['form'] = f
+        return HttpResponseRedirect('/categoria/lista')
+    return render(request, 'front-end/categoria/categoria_form.html', data)
 
 
 def editar(request, id):
@@ -94,5 +91,3 @@ def eliminar(request):
         data['error'] = "!No se puede eliminar esta categoria porque esta referenciado en otros procesos!!"
         data['content'] = "Intenta con otra categoria"
     return JsonResponse(data)
-
-

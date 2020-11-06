@@ -32,7 +32,7 @@ class lista(SuperUserRequiredMixin, ListView):
 
 def nuevo(request):
     data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa' : empresa,
+        'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa': empresa,
         'boton': 'Guardar Servicio', 'action': 'add', 'titulo': 'Nuevo Registro de un Servicio',
     }
     if request.method == 'GET':
@@ -43,27 +43,24 @@ def nuevo(request):
 def crear(request):
     f = ServicioForm(request.POST)
     data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa' : empresa,
+        'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa': empresa,
         'boton': 'Guardar Servicio', 'action': 'add', 'titulo': 'Nuevo Registro de un Servicio'
     }
-    action = request.POST['action']
-    data['action'] = action
-    if request.method == 'POST' and 'action' in request.POST:
-        if action == 'add':
-            f = ServicioForm(request.POST)
-            if f.is_valid():
-                f.save()
-            else:
-                data['form'] = f
-                return render(request, 'front-end/servicio/servicio_form.html', data)
-            return HttpResponseRedirect('/servicio/lista')
+    if request.method == 'POST':
+        f = ServicioForm(request.POST)
+        if f.is_valid():
+            f.save()
+        else:
+            data['form'] = f
+            return render(request, 'front-end/servicio/servicio_form.html', data)
+        return HttpResponseRedirect('/servicio/lista')
 
 
 def editar(request, id):
     servicio = Servicio.objects.get(id=id)
     crud = '/servicio/editar/' + str(id)
     data = {
-        'icono': opc_icono, 'crud': crud, 'entidad': opc_entidad, 'empresa' : empresa,
+        'icono': opc_icono, 'crud': crud, 'entidad': opc_entidad, 'empresa': empresa,
         'boton': 'Guardar Edicion', 'titulo': 'Editar Registro de un Servicio',
     }
     if request.method == 'GET':
@@ -94,7 +91,6 @@ def eliminar(request):
         data['error'] = "!No se puede eliminar este Servicio porque esta referenciado en otros procesos!!"
         data['content'] = "Intenta con otro Servicio"
     return JsonResponse(data)
-
 
 # @csrf_exempt
 # def index(request):

@@ -6,9 +6,9 @@ from django.contrib.auth.decorators import login_required
 app_name = 'Empleados'
 
 urlpatterns = [
-    path('lista', login_required(lista.as_view()), name='lista'),
-    path('nuevo', login_required(views.nuevo), name='nuevo'),
-    path('crear', login_required(views.crear), name='crear'),
+    path('lista', lista.as_view(), name='lista'),
+    path('nuevo', views.nuevo, name='nuevo'),
+    path('crear', views.crear, name='crear'),
     path('estado', login_required(views.estado), name='estado'),
     path('editar/<int:id>', views.editar, name='editar'),
     path('data', login_required(views.data), name='data'),

@@ -126,12 +126,14 @@ def editar(request, id):
         if form.is_valid():
             form.save(commit=False)
             if int(form.data['cargo']) == 1:
+
                     form.save()
                     nw = form.save()
                     ch = Empleado.objects.get(pk=nw.pk)
                     ch.is_superuser = 1
                     ch.save()
             else:
+                print(2)
                 form.save()
                 nw = form.save()
                 ch = Empleado.objects.get(pk=nw.pk)

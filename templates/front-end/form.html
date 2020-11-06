@@ -18,6 +18,9 @@
                     <div class="form">
                         <form class="cmxform form-horizontal style-form" id="form" method="POST" action="{{ crud }}">
                             <input type="hidden" id="action" name="action" value="{{ action }}">
+                            <input type="hidden" id="indice" name="action" value="{{ empresa.indice }}">
+                            <input type="hidden" id="action" name="action" value="{{ action }}">
+                            <input type="hidden" id="iva" name="action" value="{{ empresa.iva }}">
                             <input type="hidden" name="option" value="{{ option }}">
                             <label class="badge bg-important">{{ error }}</label>
                             {% for hidden in form.hidden_fields %}

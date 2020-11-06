@@ -39,17 +39,6 @@ var datos = {
 };
 $(function () {
     daterange();
-        $.ajax({
-            type: "POST",
-            url: '/venta/data_report_total',
-            data: datos.fechas,
-            dataType: 'json',
-            success: function (data) {
-                datatable.clear();
-                datatable.rows.add(data).draw();
-            },
-        });
-
     datatable = $("#datatable").DataTable({
         destroy: true,
         scrollX: true,

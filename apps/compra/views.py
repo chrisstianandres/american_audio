@@ -208,6 +208,9 @@ def get_producto(request):
                 item['cantidad'] = 1
                 item['subtotal'] = 0.00
                 item['iva_emp'] = iva_emp.iva
+                cal = float(item['p_compra']) / (item['iva_emp'] + 100)
+                print(item['p_compra'])
+                item['p_compra'] = cal
                 data.append(item)
         else:
             data['error'] = 'No ha selecionado ningun Insumo'
@@ -224,7 +227,10 @@ def get_detalle(request):
         if id:
             data = []
             for p in Detalle_compra.objects.filter(compra_id=id):
-                data.append(p.toJSON())
+                item = p.toJSON()
+                item['p_compra'] = float(p.producto.p_compra) - float(p.compra.iva)
+                item['subtotal'] = float(p.compra.subtotal)
+                data.append(item)
         else:
             data['error'] = 'Ha ocurrido un error'
     except Exception as e:
@@ -347,7 +353,6 @@ def data_report(request):
     end_date = request.POST.get('end_date', '')
     try:
         if start_date == '' and end_date == '':
-            print(14)
             query = Detalle_compra.objects.values('compra__fecha_compra', 'producto__nombre',
                                                  'producto__pvp').order_by(). \
                 annotate(Sum('cantidad'))

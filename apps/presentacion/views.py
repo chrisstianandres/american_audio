@@ -42,20 +42,17 @@ def nuevo(request):
 def crear(request):
     f = PresentacionForm(request.POST)
     data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa' : empresa,
+        'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa': empresa,
         'boton': 'Guardar Presentacion', 'action': 'add', 'titulo': 'Nuevo Registro de una Presentacion'
     }
-    action = request.POST['action']
-    data['action'] = action
-    if request.method == 'POST' and 'action' in request.POST:
-        if action == 'add':
-            f = PresentacionForm(request.POST)
-            if f.is_valid():
-                f.save()
-            else:
-                data['form'] = f
-                return render(request, 'front-end/presentacion/presentacion_form.html', data)
-            return HttpResponseRedirect('/presentacion/lista')
+    if request.method == 'POST':
+        f = PresentacionForm(request.POST)
+        if f.is_valid():
+            f.save()
+        else:
+            data['form'] = f
+            return render(request, 'front-end/presentacion/presentacion_form.html', data)
+        return HttpResponseRedirect('/presentacion/lista')
 
 
 def editar(request, id):

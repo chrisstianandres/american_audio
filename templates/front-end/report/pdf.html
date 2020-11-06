@@ -87,14 +87,14 @@
 
     </thead>
     <tbody>
-    {% for d in sale.detalle_venta_set.all %}
+    {% for d in det_sale %}
         {% if d.producto.id != None %}
             <tr {% if forloop.first %}style="padding-top: 3px;" {% endif %}>
                 <td>{{ d.producto.nombre }}</td>
                 <td>{{ d.producto.categoria.nombre }}</td>
                 <td>{{ d.producto.presentacion.nombre }}</td>
                 <td class="text-center">{{ d.cantidadp }}</td>
-                <td class="text-center">${{ d.producto.pvp }}</td>
+                <td class="text-center">${{ d.pvp }}</td>
                 <td style="text-align: right;">${{ d.subtotalp }}</td>
             </tr>
             <tr></tr>
@@ -112,7 +112,7 @@
             <tr {% if forloop.first %}style="padding-top: 3px;" {% endif %}>
                 <td colspan="3">{{ d.servicio.nombre }}</td>
                 <td class="text-center">{{ d.cantidads }}</td>
-                <td class="text-center">${{ d.servicio.pvp }}</td>
+                <td class="text-center">${{ d.pvp_s }}</td>
                 <td style="text-align: right;">${{ d.subtotals }}</td>
             </tr>
             <tr style="border-top: 1px solid black; padding-top: 4px;"></tr>

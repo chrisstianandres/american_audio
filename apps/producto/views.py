@@ -32,7 +32,7 @@ class lista(SuperUserRequiredMixin, ListView):
 
 def nuevo(request):
     data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa' : empresa,
+        'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa': empresa,
         'boton': 'Guardar Producto', 'action': 'add', 'titulo': 'Nuevo Registro de un Producto',
     }
     if request.method == 'GET':
@@ -43,27 +43,26 @@ def nuevo(request):
 def crear(request):
     f = ProductoForm(request.POST)
     data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa' : empresa,
+        'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa': empresa,
         'boton': 'Guardar Producto', 'action': 'add', 'titulo': 'Nuevo Registro de un Producto'
     }
     action = request.POST['action']
     data['action'] = action
-    if request.method == 'POST' and 'action' in request.POST:
-        if action == 'add':
-            f = ProductoForm(request.POST)
-            if f.is_valid():
-                f.save()
-            else:
-                data['form'] = f
-                return render(request, 'front-end/producto/producto_form.html', data)
-            return HttpResponseRedirect('/producto/lista')
+    if request.method == 'POST':
+        f = ProductoForm(request.POST)
+        if f.is_valid():
+            f.save()
+        else:
+            data['form'] = f
+            return render(request, 'front-end/producto/producto_form.html', data)
+        return HttpResponseRedirect('/producto/lista')
 
 
 def editar(request, id):
     producto = Producto.objects.get(id=id)
     crud = '/producto/editar/' + str(id)
     data = {
-        'icono': opc_icono, 'crud': crud, 'entidad': opc_entidad, 'empresa' : empresa,
+        'icono': opc_icono, 'crud': crud, 'entidad': opc_entidad, 'empresa': empresa,
         'boton': 'Guardar Edicion', 'titulo': 'Editar Registro de un Producto',
     }
     if request.method == 'GET':

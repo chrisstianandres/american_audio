@@ -199,7 +199,6 @@ $(function () {
                 },
                 targets: [1],
             },
-
             {
                 searchPanes: {
                     show: true,
@@ -374,11 +373,11 @@ $(function () {
 
             },
             {
-                targets: [-2],
+                targets: [-2, -3, -4],
                 class: 'text-center',
                 orderable: false,
                 render: function (data, type, row) {
-                    return '$ ' + data;
+                    return '$' + parseFloat(data).toFixed(2);
                 }
             },
             {
@@ -400,13 +399,31 @@ $(function () {
                         i : 0;
             };
             // Total over this page
-            pageTotal = api
+            pageTotalsiniva = api
                 .column(5, {page: 'current'})
                 .data()
                 .reduce(function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0);
-            total = api.column( 5 ).data().reduce( function (a, b) {
+            totaliva = api.column( 5 ).data().reduce( function (a, b) {
+                         return intVal(a) + intVal(b);
+                         }, 0 );
+            pageTotaliva = api
+                .column(6, {page: 'current'})
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            totalconiva = api.column( 6 ).data().reduce( function (a, b) {
+                         return intVal(a) + intVal(b);
+                         }, 0 );
+            pageTotalconiva = api
+                .column(7, {page: 'current'})
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            totalconiva = api.column( 7 ).data().reduce( function (a, b) {
                          return intVal(a) + intVal(b);
                          }, 0 );
 
@@ -419,7 +436,15 @@ $(function () {
 
             // Update footer
             $(api.column(5).footer()).html(
-                '$' + parseFloat(pageTotal).toFixed(2) + '( $ ' + parseFloat(total).toFixed(2) + ')'
+                '$' + parseFloat(pageTotalsiniva).toFixed(2) + '( $ ' + parseFloat(pageTotalsiniva).toFixed(2) + ')'
+                // parseFloat(data).toFixed(2)
+            );
+            $(api.column(6).footer()).html(
+                '$' + parseFloat(pageTotaliva).toFixed(2) + '( $ ' + parseFloat(pageTotaliva).toFixed(2) + ')'
+                // parseFloat(data).toFixed(2)
+            );
+            $(api.column(7).footer()).html(
+                '$' + parseFloat(pageTotalconiva).toFixed(2) + '( $ ' + parseFloat(pageTotalconiva).toFixed(2) + ')'
                 // parseFloat(data).toFixed(2)
             );
             $(api.column(3).footer()).html(

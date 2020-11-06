@@ -92,7 +92,7 @@ WSGI_APPLICATION = 'americanaudio.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bd_americanaudio',
+        'NAME': 'bd_audio',
         'USER': 'user_bd',
         'PASSWORD': '123456',
         'HOST': 'localhost',

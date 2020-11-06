@@ -1,5 +1,6 @@
 $(document).ready(function () {
-    $('input[name="pvp"]').TouchSpin({
+    $('input[name="pvp"]').attr('readonly', true);
+    $('input[name="p_compra"]').TouchSpin({
         min: 0.05,
         max: 1000000,
         step: 0.01,
@@ -73,5 +74,16 @@ $(document).ready(function () {
         var changue = pal.substr(0, 1).toUpperCase() + pal.substr(1);
         $(this).val(changue);
     });
+
+    $('input[name="p_compra"]').on('change', function () {
+        indice_ganancia();
+    });
+    function indice_ganancia() {
+        var indice = $('#indice').val();
+        var pc = $('input[name="p_compra"]').val();
+        var iva = $('#iva').val();
+        var tind = parseFloat(pc * (1+ (indice/100)) * (1 + (iva/100))).toFixed(2);
+        $('input[name="pvp"]').val(tind);
+    }
 
 });

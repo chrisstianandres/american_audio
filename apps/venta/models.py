@@ -6,6 +6,7 @@ from apps.cliente.models import Cliente
 from apps.empleado.models import Empleado
 from apps.producto.models import Producto
 from apps.servicio.models import Servicio
+from apps.empresa.models import Empresa
 
 estado = (
     (0, 'DEVUELTA'),
@@ -54,6 +55,7 @@ class Detalle_venta(models.Model):
         return '%s' % (self.venta)
 
     def toJSON(self):
+        empresa = Empresa.objects.get(pk=1)
         item = model_to_dict(self)
         item['venta'] = self.venta.toJSON()
         item['producto'] = self.producto.toJSON()

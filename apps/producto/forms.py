@@ -22,6 +22,8 @@ class ProductoForm(forms.ModelForm):
                 'class': 'form-control select2'}
             self.fields['presentacion'].widget.attrs = {
                 'class': 'form-control select2'}
+            self.fields['p_compra'].widget.attrs = {
+                'class': 'form-control form-control-sm input-sm'}
             self.fields['pvp'].widget.attrs = {
                 'class': 'form-control form-control-sm input-sm'}
 
@@ -33,6 +35,7 @@ class ProductoForm(forms.ModelForm):
                   'descripcion',
                   'categoria',
                   'presentacion',
+                  'p_compra',
                   'pvp',
                   ]
         labels = {
@@ -40,10 +43,12 @@ class ProductoForm(forms.ModelForm):
             'descripcion': 'Decripcion',
             'categoria': 'Categoria',
             'presentacion': 'Presentacion',
+            'p_compra': 'Precio de Compra',
             'pvp': 'P.V.P.',
         }
         widgets = {
             'nombre': forms.TextInput(),
+            'p_compra': forms.TextInput(),
             'pvp': forms.TextInput(),
             'decripcion': forms.Textarea(attrs={'col': '3', 'row': '2'})
         }
