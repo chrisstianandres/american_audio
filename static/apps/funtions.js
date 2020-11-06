@@ -151,7 +151,26 @@ function menssaje_error(title, content, icon, callback) {
         }
     });
 }
+function error_login(title, content, icon, callback) {
+    $.confirm({
+        theme: 'modern',
+        icon: icon,
+        title: title,
+        type: 'red',
+        content: content,
+        draggable: true,
+        buttons: {
+            info: {
+                text: '<i class="fas fa-check"></i> Ok',
+                btnClass: 'btn-blue',
+                action: function () {
+                    callback();
+                }
 
+            },
+        }
+    });
+}
 function menssaje_ok(title, content, icon, callback) {
     $.confirm({
         theme: 'modern',
@@ -172,7 +191,7 @@ function menssaje_ok(title, content, icon, callback) {
     });
 }
 
-function login(url, parametros, callback) {
+function login(url, parametros, callback, callback2) {
     $.ajax({
         dataType: 'JSON',
         type: 'POST',
@@ -183,7 +202,7 @@ function login(url, parametros, callback) {
             callback();
             return false;
         }
-        menssaje_error('Error', data.error, 'fas fa-exclamation-circle');
+        error_login('Error', data.error, 'fas fa-exclamation-circle', callback2);
     }).fail(function (jqXHR, textStatus, errorThrown) {
         alert(textStatus + ': ' + errorThrown);
     })

@@ -29,7 +29,7 @@ def menu(request):
         'titulo': 'Menu Principal', 'empresa': nombre_empresa(),
         'icono': 'fas fa-tachometer-alt', 'entidad': 'Menu Principal',
     }
-    return render(request, 'front-end/base.html', data)
+    return render(request, 'front-end/index.html', data)
 
 
 # -----------------------------------------------LOGEO----------------------------------------------------------------#

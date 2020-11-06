@@ -5,7 +5,7 @@ var grapie = Highcharts.chart('grapie', {
         plotShadow: false
     },
     title: {
-        text: 'Ventas del Mes por Producto',
+        text: 'Porcentaje de venta por Producto',
     },
     tooltip: {
         pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
@@ -39,7 +39,7 @@ var chart = Highcharts.chart('container2', {
     },
 
     title: {
-        text: 'Ventas del año'
+        text: 'Total de Ventas del año'
     },
     xAxis: {
         categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
@@ -57,7 +57,7 @@ var graph = Highcharts.chart('container3', {
         type: 'line'
     },
     title: {
-        text: 'Compras y ventas del año'
+        text: ''
     },
     subtitle: {
         text: 'Contraste de compras y ventas'
@@ -143,7 +143,7 @@ function datatbles() {
             }
         ],
         createdRow: function (row, data, dataIndex) {
-            $('td', row).eq(4).find('span').addClass('badge bg-important');
+            $('td', row).eq(4).find('span').addClass('badge bg-danger').attr("style", "color: white");
         }
     });
     $("#datatable2").DataTable({

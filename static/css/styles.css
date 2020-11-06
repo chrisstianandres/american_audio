@@ -6096,6 +6096,9 @@ a.close.disabled {
 .bg-primary {
   background-color: #007bff !important;
 }
+.login_card {
+  background-image: url('/static/img/login_background.jpg') !important;
+}
 
 a.bg-primary:hover, a.bg-primary:focus,
 button.bg-primary:hover,
