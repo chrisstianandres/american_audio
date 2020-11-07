@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'apps.inventario',
     'apps.tipogasto',
     'apps.gasto',
+    'apps.delvoluciones_venta',
 
 ]
 

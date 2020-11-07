@@ -157,6 +157,49 @@ def eliminar(request):
     return JsonResponse(data)
 
 
+@csrf_exempt
+def data_report(request):
+    data = []
+    start_date = request.POST.get('start_date', '')
+    end_date = request.POST.get('end_date', '')
+    try:
+        if start_date == '' and end_date == '':
+            query = Cliente.objects.all()
+        else:
+            query = Cliente.objects.filter(fecha__range=[start_date, end_date])
+
+        for p in query:
+            data.append([
+                p.id,
+                p.fecha.strftime("%d/%m/%Y"),
+                p.nombres + " " + p.apellidos ,
+                p.cedula,
+                p.correo,
+                p.get_sexo_display(),
+                p.direccion,
+                p.telefono
+            ])
+    except:
+        pass
+    return JsonResponse(data, safe=False)
+
+
+class report(ListView):
+    model = Cliente
+    template_name = 'front-end/cliente/cliente_report.html'
+
+    def get_queryset(self):
+        return Cliente.objects.none()
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['icono'] = opc_icono
+        data['entidad'] = opc_entidad
+        data['titulo'] = 'Reporte de Clientes'
+        data['empresa'] = empresa
+        return data
+
+
 def verificar(nro):
     error = ''
     l = len(nro)

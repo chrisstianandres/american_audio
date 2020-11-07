@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 from django.forms import model_to_dict
 
@@ -14,6 +16,7 @@ class Proveedor(models.Model):
     correo = models.CharField(max_length=50, null=True, blank=True, unique=True)
     telefono = models.CharField(max_length=10, unique=True)
     direccion = models.CharField(max_length=50)
+    fecha = models.DateField(default=datetime.now)
 
     def __str__(self):
         return '{} / {} / {}'.format(self.nombres, self.direccion, self.numero_documento)

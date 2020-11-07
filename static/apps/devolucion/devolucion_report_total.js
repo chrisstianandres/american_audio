@@ -24,9 +24,8 @@ var datos = {
             this.fechas['start_date'] = '';
             this.fechas['end_date'] = '';
         }
-
         $.ajax({
-            url: '/venta/data',
+            url: '/devolucion/data',
             type: 'POST',
             data: this.fechas,
             success: function (data) {
@@ -37,15 +36,16 @@ var datos = {
 
     },
 };
+
+
 $(function () {
     daterange();
     datatable = $("#datatable").DataTable({
-        // responsive: true,
         destroy: true,
         scrollX: true,
         autoWidth: false,
         ajax: {
-            url: '/venta/data',
+            url: '/devolucion/data',
             type: 'POST',
             data: datos.fechas,
             dataSrc: ""
@@ -63,12 +63,10 @@ $(function () {
                     0: 'Ningun Filtro seleccionado',
                 },
                 activeMessage: 'Filtros activos (%d)',
-                emptyPanes: 'There are no panes to display. :/',
-                sZeroRecords: "No se encontraron resultados",
 
             }
         },
-        order: [[0, "desc"]],
+        order: [[4, "desc"]],
         dom: 'l<"toolbar">' + "<br>" + 'Bfrtip ',
         buttons: [
             {
@@ -81,7 +79,7 @@ $(function () {
                 }
             },
             {
-                text: '<i class="fa fa-file-pdf"> </i> Reporte PDF',
+                text: '<i class="fa fa-file-pdf"></i> Reporte PDF',
                 className: 'btn btn-danger my_class',
                 extend: 'pdfHtml5',
                 //filename: 'dt_custom_pdf',
@@ -158,13 +156,13 @@ $(function () {
                         return 4;
                     };
                     doc.content[0].layout = objLayout;
-                    doc.content[1].table.widths = [65, '*', "*", 85, 75, 85];
+                    doc.content[1].table.widths = ['*', '*', '*', '*', '*','*'];
                     doc.styles.tableBodyEven.alignment = 'center';
                     doc.styles.tableBodyOdd.alignment = 'center';
                 }
             },
             {
-                text: '<i class="fa fa-file-excel"> </i> Reporte Excel', className: "btn btn-success my_class",
+                text: '<i class="fa fa-file-excel"></i> Reporte Excel', className: "btn btn-success my_class",
                 extend: 'excel'
             }
         ],
@@ -173,13 +171,13 @@ $(function () {
                 searchPanes: {
                     show: false,
                 },
-                targets: [0],
+                targets: [0, 1, 2],
             },
             {
                 searchPanes: {
                     show: true,
                 },
-                targets: [1, 2, 4],
+                targets: [3, 4, 5],
             },
             {
                 searchPanes: {
@@ -244,7 +242,7 @@ $(function () {
                         {
                             label: '$ 400 a $ 500',
                             value: function (rowData, rowIdx) {
-                                return rowData[2] <= 500 && rowData[2] >= 400;
+                                return rowData[3] <= 500 && rowData[3] >= 400;
                             }
                         },
                         {
@@ -263,30 +261,17 @@ $(function () {
 
             },
             {
-                targets: [3],
+                targets: [-1],
                 class: 'text-center',
-                orderable: false,
+                width: "8%",
                 render: function (data, type, row) {
-                    return '$' + parseFloat(data).toFixed(2);
+                    return  '<a type="button" rel="detalle" class="btn btn-primary btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Detalle"><i class="fa fa-search"></i></a>' + ' ';;
                 }
             },
             {
                 targets: [-2],
-                class: 'text-center',
-                orderable: false,
                 render: function (data, type, row) {
-                    return '<span>' + data + '</span>';
-                }
-            },
-            {
-                targets: [-1],
-                class: 'text-center',
-                width: "15%",
-                render: function (data, type, row) {
-                    var detalle = '<a type="button" rel="detalle" class="btn btn-success btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Detalle de Productos" ><i class="fa fa-search"></i></a>' + ' ';
-                    var devolver = '<a type="button" rel="devolver" class="btn btn-danger btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Devolver"><i class="fa fa-times"></i></a>' + ' ';
-                    var pdf = '<a type="button" href= "/venta/printpdf/' + row[4] + '" rel="pdf" class="btn btn-primary btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Reporte PDF"><i class="fa fa-file-pdf"></i></a>';
-                    return detalle + devolver + pdf;
+                    return '$' + data ;
                 }
             },
             {
@@ -296,43 +281,44 @@ $(function () {
                 }
             }
         ],
-        createdRow: function (row, data, dataIndex) {
-            if (data[5] === 'FINALIZADA') {
-                $('td', row).eq(5).find('span').addClass('badge bg-success').attr("style", "color: white");
-            } else if (data[5] === 'DEVUELTA') {
-                $('td', row).eq(5).find('span').addClass('badge bg-danger').attr("style", "color: white");
-                $('td', row).eq(6).find('a[rel="devolver"]').hide();
-                $('td', row).eq(6).find('a[rel="pdf"]').hide();
-            }
+        footerCallback: function (row, data, start, end, display) {
+            var api = this.api(), data;
 
-        }
+            // Remove the formatting to get integer data for summation
+            var intVal = function (i) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '') * 1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+            pageTotal = api
+                .column(6, {page: 'current'})
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            // total full table
+            total = api.column(6).data().reduce(function (a, b) {
+                return intVal(a) + intVal(b);
+            }, 0);
+
+              $(api.column(6).footer()).html(
+                '$ ' + parseFloat(pageTotal).toFixed(2) + ' ( $ ' + parseFloat(total).toFixed(2) + ')'
+                // parseFloat(data).toFixed(2)
+            );
+        },
+        // createdRow: function (row, data, dataIndex) {
+        //     if (data[2] === 'No vendido' && data[7] === 'En Stock') {
+        //         $('td', row).eq(2).find('span').addClass('badge bg-success').attr("style", "color: white");
+        //         $('td', row).eq(7).find('span').addClass('badge bg-success').attr("style", "color: white");
+        //     } else {
+        //         $('td', row).eq(7).find('span').addClass('badge bg-danger').attr("style", "color: white");
+        //         $('td', row).eq(8).find('a[rel="devolver"]').hide();
+        //     }
+        //
+        // }
     });
-
-    $('#datatable tbody').on('click', 'a[rel="devolver"]', function () {
-        $('.tooltip').remove();
-        var tr = datatable.cell($(this).closest('td, li')).index();
-        var data = datatable.row(tr.row).data();
-        var parametros = {'id': data['6']};
-        save_estado('Alerta',
-            '/venta/estado', 'Esta seguro que desea devolver esta venta?', parametros,
-            function () {
-                menssaje_ok('Exito!', 'Exito al devolver la venta', 'far fa-smile-wink', function () {
-                    datatable.ajax.reload(null, false);
-                })
-            });
-
-    }).on('click', 'a[rel="borrar"]', function () {
-        $('.tooltip').remove();
-        var tr = datatable.cell($(this).closest('td, li')).index();
-        var data = datatable.row(tr.row).data();
-        var parametros = {'id': data['6']};
-        save_estado('Alerta',
-            '/venta/eliminar', 'Esta seguro que desea eliminar esta venta?', parametros,
-            function () {
-                menssaje_ok('Exito!', 'Exito al Eliminar la venta', 'far fa-smile-wink')
-            });
-    })
-        .on('click', 'a[rel="detalle"]', function () {
+    $('#datatable tbody').on('click', 'a[rel="detalle"]', function () {
         $('.tooltip').remove();
         var tr = datatable.cell($(this).closest('td, li')).index();
         var data = datatable.row(tr.row).data();
@@ -349,7 +335,7 @@ $(function () {
                 url: '/venta/get_detalle',
                 type: 'Post',
                 data: {
-                    'id': data['4']
+                    'id': data[5]
                 },
                 dataSrc: ""
             },
@@ -411,7 +397,7 @@ $(function () {
                 url: '/venta/get_detalle_serv',
                 type: 'POST',
                 data: {
-                    'id': data['4']
+                    'id': data[5]
                 },
                 dataSrc: ""
             },
@@ -438,11 +424,9 @@ $(function () {
         });
 
     });
-
 });
 
 function daterange() {
-    $("div.toolbar").html('<br><div class="col-lg-3"><input type="text" name="fecha" class="form-control form-control-sm input-sm"></div> <br>');
     $('input[name="fecha"]').daterangepicker({
         locale: {
             format: 'YYYY-MM-DD',

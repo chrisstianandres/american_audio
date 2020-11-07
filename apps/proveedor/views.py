@@ -5,6 +5,7 @@ from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import ListView
 
 from apps.backEnd import nombre_empresa
 from apps.cliente.models import Cliente
@@ -181,6 +182,49 @@ def eliminar(request):
     return JsonResponse(data)
 
 
+@csrf_exempt
+def data_report(request):
+    data = []
+    start_date = request.POST.get('start_date', '')
+    end_date = request.POST.get('end_date', '')
+    try:
+        if start_date == '' and end_date == '':
+            query = Proveedor.objects.all()
+        else:
+            query = Proveedor.objects.filter(fecha__range=[start_date, end_date])
+
+        for p in query:
+            data.append([
+                p.id,
+                p.fecha.strftime("%d/%m/%Y"),
+                p.nombres,
+                p.get_documento_display(),
+                p.numero_documento,
+                p.correo,
+                p.direccion,
+                p.telefono
+            ])
+    except:
+        pass
+    return JsonResponse(data, safe=False)
+
+
+class report(ListView):
+    model = Proveedor
+    template_name = 'front-end/proveedor/proveedor_report.html'
+
+    def get_queryset(self):
+        return Proveedor.objects.none()
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['icono'] = opc_icono
+        data['entidad'] = opc_entidad
+        data['titulo'] = 'Reporte de Proveedores'
+        data['empresa'] = empresa
+        return data
+
+
 def verificar(nro):
     l = len(nro)
     if l == 10 or l == 13:  # verificar la longitud correcta
@@ -231,3 +275,5 @@ def __validar_ced_ruc(nro, tipo):
     mod = total % base
     val = base - mod if mod != 0 else 0
     return val == d_ver
+
+

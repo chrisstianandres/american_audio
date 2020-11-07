@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 from django.forms import model_to_dict
 
@@ -15,6 +17,7 @@ class Cliente(models.Model):
     sexo = models.IntegerField(choices=SEXO, default=1)
     telefono = models.CharField(max_length=10, unique=True)
     direccion = models.CharField(max_length=50)
+    fecha = models.DateField(default=datetime.now)
 
     def __str__(self):
         return '%s %s' % (self.nombres, self.apellidos)
