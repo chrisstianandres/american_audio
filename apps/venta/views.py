@@ -685,14 +685,17 @@ def data_report_total(request):
         else:
             query = Venta.objects.values('fecha_venta', 'cliente__nombres', 'cliente__apellidos',
                                          'empleado__first_name',
-                                         'empleado__last_name', 'total').filter(
-                fecha_venta__range=[start_date, end_date])
+                                         'empleado__last_name').filter(
+                fecha_venta__range=[start_date, end_date]).annotate(Sum('subtotal')).\
+                annotate(Sum('iva')).annotate(Sum('total'))
             for p in query:
                 data.append([
                     p['fecha_venta'].strftime("%d/%m/%Y"),
                     p['cliente__nombres'] + " " + p['cliente__apellidos'],
                     p['empleado__first_name'] + " " + p['empleado__last_name'],
-                    format(p['total'], '.2f')
+                    format(p['subtotal__sum'], '.2f'),
+                    format(p['iva__sum'], '.2f'),
+                    format(p['total__sum'], '.2f')
                 ])
     except:
         pass

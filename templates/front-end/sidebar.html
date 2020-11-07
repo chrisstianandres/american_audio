@@ -49,6 +49,8 @@
                             &nbsp;Servicio</a>
                         <a class="nav-link" href="{% url 'categoria:lista' %}"><i class="fa fa-boxes"></i> &nbsp;Categoria</a>
                         <a class="nav-link" href="{% url 'presentacion:lista' %}"><i class="fab fa-untappd"></i> &nbsp;Presentacion</a>
+                        <a class="nav-link" href="{% url 'gasto:lista' %}"><i class="fas fa-file-invoice-dollar"></i> &nbsp;Gasto</a>
+                        <a class="nav-link" href="{% url 'tipo_gasto:lista' %}"><i class="far fa-keyboard"></i> &nbsp;Tipo de Gasto</a>
                     </nav>
                 </div>
 
@@ -86,6 +88,7 @@
                             </nav>
                         </div>
                         <a class="nav-link" href="{% url 'inventario:lista' %}"><i class="fas fa-warehouse"></i> &nbsp;Inventario</a>
+                        <a class="nav-link" href="{% url 'gasto:report_total' %}"><i class="fas fa-warehouse"></i> &nbsp;Gastos</a>
                     </nav>
                 </div>
             </div>

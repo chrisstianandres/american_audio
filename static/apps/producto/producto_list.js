@@ -30,7 +30,7 @@ $(function () {
 
             }
         },
-        dom: "<'top'B> frtip",
+        dom: 'l<"toolbar">' + "<br>" + 'Bfrtip ',
         buttons: [
             {
                 className: 'btn-default my_class', extend: 'searchPanes', config: {
@@ -40,7 +40,7 @@ $(function () {
                 }
             },
             {
-                text: '<i class="fa fa-file-pdf"> Reporte PDF</i>',
+                text: '<i class="fa fa-file-pdf"></i> Reporte PDF',
                 className: 'btn btn-danger my_class',
                 extend: 'pdfHtml5',
                 //filename: 'dt_custom_pdf',
@@ -123,7 +123,7 @@ $(function () {
                 }
             },
             {
-                text: '<i class="fa fa-file-excel"> Reporte Excel</i>', className: "btn btn-success my_class",
+                text: '<i class="fa fa-file-excel"></i> Reporte Excel', className: "btn btn-success my_class",
                 extend: 'excel'
             }
         ],

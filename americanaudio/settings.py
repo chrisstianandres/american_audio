@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.apps.AppsConfig',
+    'django-backup',
+    'dbbackup',
 
     # sistema
 
@@ -52,6 +54,8 @@ INSTALLED_APPS = [
     'apps.presentacion',
     'apps.servicio',
     'apps.inventario',
+    'apps.tipogasto',
+    'apps.gasto',
 
 ]
 
@@ -150,3 +154,8 @@ STATICFILES_DIRS = [
 LOGIN_URL = '/login'
 
 AUTH_USER_MODEL = 'empleado.Empleado'
+
+DBBACKUP_STORAGE = 'dbbackup.storage.builtin_django'
+# Default
+# DBBACKUP_DJANGO_STORAGE = 'django.core.file.storages.FileSystemStorage'
+DBBACKUP_STORAGE_OPTIONS = {'location': '/mybackupdir/'}
