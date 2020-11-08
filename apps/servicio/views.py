@@ -91,14 +91,3 @@ def eliminar(request):
         data['error'] = "!No se puede eliminar este Servicio porque esta referenciado en otros procesos!!"
         data['content'] = "Intenta con otro Servicio"
     return JsonResponse(data)
-
-# @csrf_exempt
-# def index(request):
-#     data = {}
-#     try:
-#         data = []
-#         for p in Servicio.objects.filter(stock__lt=10):
-#             data.append(p.toJSON())
-#     except Exception as e:
-#         data['error'] = str(e)
-#     return JsonResponse(data, safe=False)

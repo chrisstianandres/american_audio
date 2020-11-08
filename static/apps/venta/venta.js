@@ -15,14 +15,14 @@ var ventas = {
         var subtotal = 0.00;
         var iva_emp = 0.00;
         $.each(this.items.productos, function (pos, dict) {
-            dict.subtotal = dict.cantidad * parseFloat(dict.pvp);
-            subtotal += dict.subtotal;
-            iva_emp = dict.iva_emp;
+            // dict.subtotal = dict.cantidad * parseFloat(dict.pvp);
+            // subtotal += dict.subtotal;
+            // iva_emp = dict.iva_emp;
         });
         $.each(this.items.servicios, function (pos, dict) {
-            dict.subtotal = dict.cantidad * parseFloat(dict.pvp);
-            subtotal += dict.subtotal;
-            iva_emp = dict.iva_emp;
+            // dict.subtotal = dict.cantidad * parseFloat(dict.pvp);
+            // subtotal += dict.subtotal;
+            // iva_emp = dict.iva_emp;
         });
         this.items.subtotal = subtotal;
         this.items.iva = this.items.subtotal * iva_emp;
@@ -48,11 +48,10 @@ var ventas = {
             data: this.items.productos,
             columns: [
                 {data: 'id'},
-                {data: "nombre"},
-                {data: "categoria.nombre"},
-                {data: "presentacion.nombre"},
-                {data: "stock"},
-                {data: "cantidad"},
+                {data: "producto.nombre"},
+                {data: "producto.categoria.nombre"},
+                {data: "producto.presentacion.nombre"},
+                {data: "serie"},
                 {data: "pvp"},
                 {data: "subtotal"}
             ],
@@ -75,22 +74,16 @@ var ventas = {
                         return '$' + parseFloat(data).toFixed(2);
                     }
                 },
-                {
-                    targets: [-3],
-                    class: 'text-center',
-                    orderable: false,
-                    render: function (data, type, row) {
-                        return '<input type="text" name="cantidad" class="form-control form-control-sm input-sm" autocomplete="off" value="' + data + '">';
-
-                    }
-                }],
-            rowCallback: function (row, data) {
-                $(row).find('input[name="cantidad"]').TouchSpin({
-                    min: 1,
-                    max: data['stock'],
-                    step: 1
-                });
-            }
+                // {
+                //     targets: [-3],
+                //     class: 'text-center',
+                //     orderable: false,
+                //     render: function (data, type, row) {
+                //         return '<input type="text" name="cantidad" class="form-control form-control-sm input-sm" autocomplete="off" value="' + data + '">';
+                //
+                //     }
+                // }
+            ]
         });
     },
     addserv: function (data) {
@@ -127,11 +120,20 @@ var ventas = {
                     }
                 },
                 {
-                    targets: [-1, -2],
+                    targets: [-1],
                     class: 'text-center',
                     orderable: false,
                     render: function (data, type, row) {
                         return '$' + parseFloat(data).toFixed(2);
+                    }
+                },
+                {
+                    targets: [-2],
+                    class: 'text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return '<input type="text" name="pvp" class="form-control form-control-sm input-sm" autocomplete="off" value="' + data + '">';
+
                     }
                 },
                 {
@@ -144,10 +146,20 @@ var ventas = {
                     }
                 }],
             rowCallback: function (row, data) {
-                $(row).find('input[name="cantidad"]').TouchSpin({
-                    min: 1,
-                    max: 100000,
-                    step: 1
+                // $(row).find('input[name="cantidad"]').TouchSpin({
+                //     min: 1,
+                //     max: 100000,
+                //     step: 1
+                // });
+                $(row).find('input[name="pvp"]').TouchSpin({
+                    min: 0.05,
+                    max: 1000000,
+                    step: 0.01,
+                    decimals: 2,
+                    forcestepdivisibility: 'none',
+                    boostat: 5,
+                    maxboostedstep: 10,
+                    prefix: '$'
                 });
             }
         });
@@ -178,7 +190,7 @@ $(function () {
             dataType: 'json',
             success: function (data) {
                 ventas.add(data['0']);
-                $('#id_producto option:selected').remove();
+                $('#id_producto').val(null).trigger('change');
             },
             error: function (xhr, status, data) {
                 alert(data['0']);
@@ -212,14 +224,21 @@ $(function () {
             'Esta seguro que desea eliminar este producto de tu detalle?', function () {
                 var p = ventas.items.productos[tr.row];
                 ventas.items.productos.splice(tr.row, 1);
-                $('#id_producto').append('<option value="' + p.id + '">' + p.nombre + '</option>');
-                // $('#id_producto').selectpicker('refresh');
-
-                menssaje_ok('Confirmacion!', 'Producto eliminado', 'far fa-smile-wink', function () {
-                    ventas.list();
+                var productos = {'productos': JSON.stringify(ventas.items.productos)};
+                productos['id'] = p.id;
+                productos['key'] = 0;
+                $.ajax({
+                    url: '/inventario/remove_select',
+                    type: 'POST',
+                    data: productos,
+                    success: function () {
+                        menssaje_ok('Confirmacion!', 'Producto eliminado', 'far fa-smile-wink', function () {
+                            ventas.list();
+                        });
+                    }
                 });
             })
-    }).on('change keyup', 'input[name="cantidad"]', function () {
+    }).on('change keyup', 'input[name="pvp"]', function () {
         var cantidad = parseInt($(this).val());
         var tr = tblventa.cell($(this).closest('td, li')).index();
         ventas.items.productos[tr.row].cantidad = cantidad;
@@ -230,10 +249,21 @@ $(function () {
         if (ventas.items.productos.length === 0) return false;
         borrar_todo_alert('Alerta de Eliminación',
             'Esta seguro que desea eliminar todos los productos seleccionados?', function () {
-                ventas.items.productos = [];
-                menssaje_ok('Confirmacion!', 'Productos eliminados', 'far fa-smile-wink', function () {
-                    location.reload();
+                var productos = {'productos': JSON.stringify(ventas.items.productos)};
+                productos['id'] = 0;
+                productos['key'] = 1;
+                $.ajax({
+                    url: '/inventario/remove_select',
+                    type: 'POST',
+                    data: productos,
+                    success: function () {
+                        menssaje_ok('Confirmacion!', 'Productos eliminados', 'far fa-smile-wink', function () {
+                            ventas.items.productos = [];
+                            ventas.list();
+                        });
+                    }
                 });
+
             });
     });
 
@@ -262,7 +292,7 @@ $(function () {
         if ($('select[name="cliente"]').val() === "") {
             menssaje_error('Error!', "Debe seleccionar un cliente", 'far fa-times-circle');
             return false
-        } else if (ventas.items.productos.length === 0  && ventas.items.servicios.length ===0)  {
+        } else if (ventas.items.productos.length === 0 && ventas.items.servicios.length === 0) {
             menssaje_error('Error!', "Debe seleccionar al menos un producto o servicio", 'far fa-times-circle');
             return false
         }
@@ -345,6 +375,41 @@ $(function () {
     $('#Modal').on('hidden.bs.modal', function (e) {
         reset();
         $('#form').trigger("reset");
+    });
+    $('#id_producto').select2({
+        theme: "classic",
+        language: {
+            inputTooShort: function () {
+                return "Ingresa al menos un caracter...";
+            },
+            "noResults": function () {
+                return "Sin resultados";
+            },
+            "searching": function () {
+                return "Buscando...";
+            }
+        },
+        allowClear: true,
+        ajax: {
+            delay: 250,
+            type: 'POST',
+            url: '/inventario/data_select',
+            data: function (params) {
+                var queryParameters = {
+                    term: params.term,
+                };
+                return queryParameters;
+            },
+            processResults: function (data) {
+                return {
+                    results: data
+                };
+
+            },
+
+        },
+        placeholder: 'Busca un Producto',
+        minimumInputLength: 1,
     });
 
 

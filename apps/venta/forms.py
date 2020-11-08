@@ -4,6 +4,7 @@ from .models import Venta, Detalle_venta
 from tempus_dominus.widgets import DatePicker
 
 from ..cliente.models import Cliente
+from ..inventario.models import Inventario
 from ..producto.models import Producto
 
 
@@ -80,7 +81,7 @@ class Detalle_VentaForm(forms.ModelForm):
                 'class': 'form-control select2',
                 'data-live-search': "true"
             }
-            self.fields["producto"].queryset = Producto.objects.filter(stock__gte=1)
+            self.fields["producto"].queryset = Inventario.objects.none()
             self.fields['servicio'].widget.attrs = {
                 'class': 'form-control select2',
                 'style': 'width: 100%',

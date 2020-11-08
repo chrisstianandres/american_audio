@@ -4,6 +4,11 @@ from django.forms import model_to_dict
 from apps.categoria.models import Categoria
 from apps.presentacion.models import Presentacion
 
+RESP = (
+    (1, 'Si'),
+    (0, 'No'),
+)
+
 
 class Producto(models.Model):
     categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT)
@@ -13,6 +18,7 @@ class Producto(models.Model):
     descripcion = models.CharField(max_length=50)
     pvp = models.DecimalField(default=0.00, max_digits=9, decimal_places=2, null=True, blank=True)
     p_compra = models.DecimalField(default=0.00, max_digits=9, decimal_places=2, null=True, blank=True)
+    instalacion = models.IntegerField(choices=RESP, default=0)
 
     def __str__(self):
         return '%s' % self.nombre

@@ -12,5 +12,7 @@ urlpatterns = [
     path('nuevo', login_required(views.nuevo), name='nuevo'),
     path('crear', login_required(views.crear), name='crear'),
     path('eliminar', login_required(views.eliminar), name='eliminar'),
+    path('remove_select', login_required(views.remove_select), name='remove_select'),
+    path('data_select', login_required(views.data_select), name='data_select'),
 
 ]

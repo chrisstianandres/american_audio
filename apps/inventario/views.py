@@ -2,7 +2,7 @@ import json
 
 import goslate
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Max, Count, Sum
 from django.http import HttpResponseRedirect, HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -150,4 +150,49 @@ def eliminar(request):
     except Exception as e:
         data['error'] = 'No se puede eliminar este cliente porque esta referenciado en otros procesos'
         data['content'] = 'Intenta con otro cliente'
+    return JsonResponse(data)
+
+
+@csrf_exempt
+def data_select(request):
+    data = {}
+    try:
+        query = Inventario.objects.values('producto_id', 'producto__nombre').filter(estado=1, select=0).order_by(). \
+            annotate(Max('producto__id'))
+        data = []
+        for p in query:
+            result = {
+                'id': int(p['producto_id']),
+                'text': str(p['producto__nombre'])
+            }
+            data.append(result)
+    except Exception as e:
+        data['error'] = str(e)
+    return JsonResponse(data, safe=False)
+
+
+@csrf_exempt
+def remove_select(request):
+    data = {}
+    try:
+        id = json.loads(request.POST['productos'])
+        pik = json.loads(request.POST['id'])
+        key = json.loads(request.POST['key'])
+        if key == 1:
+            if id:
+                for p in id:
+                    ps = Inventario.objects.get(pk=int(p['id']))
+                    ps.select = 0
+                    ps.save()
+                    data['resp'] = True
+        elif pik:
+            ps = Inventario.objects.get(pk=pik)
+            print(ps)
+            ps.select = 0
+            ps.save()
+            data['resp'] = True
+        else:
+            data['error'] = 'Ha ocurrido un error'
+    except Exception as e:
+        data['error'] = str(e)
     return JsonResponse(data)
