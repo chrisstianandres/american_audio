@@ -146,8 +146,6 @@ var ventas = {
                     }
                 }],
             rowCallback: function (row, data,) {
-                console.clear();
-                console.log(data.idp);
                 if (data.idp > 0) {
                     $(row).find('input[name="cantidad"]').TouchSpin({
                         min: 1,
@@ -226,16 +224,8 @@ $(function () {
         borrar_todo_alert('Alerta de Eliminación',
             'Esta seguro que desea eliminar este producto de tu detalle?', function () {
                 var p = ventas.items.productos[tr.row];
+                checkserv(ventas.items.servicios, p);
                 ventas.items.productos.splice(tr.row, 1);
-                var ser = ventas.items.servicios;
-                if (ser.length !== 0) {
-                    for (var srv in ser) {
-                        if (ser[srv].idp === p.id) {
-                            ventas.items.servicios.splice(ser[srv], 1);
-                        }
-                    }
-                }
-
                 var productos = {'productos': JSON.stringify(ventas.items.productos)};
                 productos['id'] = p.id;
                 productos['key'] = 0;
@@ -273,12 +263,14 @@ $(function () {
                     data: productos,
                     success: function () {
                         menssaje_ok('Confirmacion!', 'Productos eliminados', 'far fa-smile-wink', function () {
+                            checkserv(ventas.items.servicios, ventas.items.productos);
                             ventas.items.productos = [];
+                            console.log(ventas.items.servicios);
+                            ventas.listserv();
                             ventas.list();
                         });
                     }
                 });
-
             });
     });
     //remover servicio del detalle
@@ -453,6 +445,26 @@ function aggservicio(id, idp) {
         },
 
     })
+}
+
+function checkserv(ser, p) {
+    if (ser.length !== 0) {
+        for (var srv in ser) {
+            if (ser[srv].idp === p.id) {
+                ventas.items.servicios.splice(ser[srv], 1);
+            }
+        }
+    }
+    if (p.length > 0) {
+        for (var pr in p) {
+            for (var srv in ser) {
+                if (ser[srv].idp === p[pr].id) {
+                    ventas.items.servicios.splice(ser[srv], 1);
+                }
+            }
+
+        }
+    }
 }
 
 //$('#id_producto').append('<option value="' + p.id + '">' + p.nombre + '</option>');
