@@ -159,7 +159,7 @@ var ventas = {
                     step: 1
                 });
                 $(row).find('input[name="pvp"]').TouchSpin({
-                    min: 0.05,
+                    min: 1.00,
                     max: 1000000,
                     step: 0.01,
                     decimals: 2,
@@ -222,7 +222,9 @@ $(function () {
     $('#tblproductos tbody').on('click', 'a[rel="remove"]', function () {
         var tr = tblventa.cell($(this).closest('td, li')).index();
         borrar_todo_alert('Alerta de Eliminación',
-            'Esta seguro que desea eliminar este producto de tu detalle?', function () {
+            'Esta seguro que desea eliminar este producto de tu detalle <br> ' +
+            'Recuerda que si seleccionaste la instalacion de este producto tambien se eliminará <br>' +
+            '<strong>CONTINUAR?</strong>', function () {
                 var p = ventas.items.productos[tr.row];
                 checkserv(ventas.items.servicios, p);
                 ventas.items.productos.splice(tr.row, 1);
@@ -234,7 +236,7 @@ $(function () {
                     type: 'POST',
                     data: productos,
                     success: function () {
-                        menssaje_ok('Confirmacion!', 'Producto eliminado', 'far fa-smile-wink', function () {
+                        menssaje_ok('Confirmacion!', 'Producto eliminado y servicio', 'far fa-smile-wink', function () {
                             ventas.list();
                             ventas.listserv();
                         });
@@ -242,18 +244,13 @@ $(function () {
                 });
             })
     });
-    //     .on('change keyup', 'input[name="pvp"]', function () {
-    //     var cantidad = parseInt($(this).val());
-    //     var tr = tblventa.cell($(this).closest('td, li')).index();
-    //     ventas.items.productos[tr.row].cantidad = cantidad;
-    //     ventas.calculate();
-    //     $('td:eq(7)', tblventa.row(tr.row).node()).html('$' + ventas.items.productos[tr.row].subtotal.toFixed(2));
-    // });
     //remover todos los productos del detalle
     $('.btnRemoveall').on('click', function () {
         if (ventas.items.productos.length === 0) return false;
         borrar_todo_alert('Alerta de Eliminación',
-            'Esta seguro que desea eliminar todos los productos seleccionados?', function () {
+            'Esta seguro que desea eliminar todos los productos seleccionados? <br>' +
+            'Recuerda que si seleccionaste las instalaciones de estos productos tambien se eliminarán <br>' +
+            '<strong>CONTINUAR?</strong>', function () {
                 var productos = {'productos': JSON.stringify(ventas.items.productos)};
                 productos['id'] = 0;
                 productos['key'] = 1;
@@ -262,14 +259,24 @@ $(function () {
                     type: 'POST',
                     data: productos,
                     success: function () {
-                        menssaje_ok('Confirmacion!', 'Productos eliminados', 'far fa-smile-wink', function () {
+                        menssaje_ok('Confirmacion!', 'Productos y servicios eliminados', 'far fa-smile-wink', function () {
                             checkserv(ventas.items.servicios, ventas.items.productos);
                             ventas.items.productos = [];
-                            console.log(ventas.items.servicios);
                             ventas.listserv();
                             ventas.list();
                         });
                     }
+                });
+            });
+    });
+    $('.btnRemoveallserv').on('click', function () {
+        if (ventas.items.servicios.length === 0) return false;
+        borrar_todo_alert('Alerta de Eliminación',
+            'Esta seguro que desea eliminar todos los servicios seleccionados? <br>' +
+            '<strong>CONTINUAR?</strong>', function () {
+                menssaje_ok('Confirmacion!', 'Productos y servicios eliminados', 'far fa-smile-wink', function () {
+                    ventas.items.servicios = [];
+                    ventas.listserv();
                 });
             });
     });
@@ -291,6 +298,12 @@ $(function () {
         var pvp = parseInt($(this).val());
         var tr = tblservicios.cell($(this).closest('td, li')).index();
         ventas.items.servicios[tr.row].pvp = pvp;
+        ventas.calculate();
+        $('td:eq(4)', tblservicios.row(tr.row).node()).html('$' + ventas.items.servicios[tr.row].subtotal.toFixed(2));
+    }).on('change keyup', 'input[name="cantidad"]', function () {
+        var cantidad = parseInt($(this).val());
+        var tr = tblservicios.cell($(this).closest('td, li')).index();
+        ventas.items.servicios[tr.row].cantidad = cantidad;
         ventas.calculate();
         $('td:eq(4)', tblservicios.row(tr.row).node()).html('$' + ventas.items.servicios[tr.row].subtotal.toFixed(2));
     });
@@ -450,22 +463,29 @@ function aggservicio(id, idp) {
 function checkserv(ser, p) {
     if (ser.length !== 0) {
         for (var srv in ser) {
-            if (ser[srv].idp === p.id) {
-                ventas.items.servicios.splice(ser[srv], 1);
-            }
+            ser.forEach(function (car, index, object) {
+                if (car.idp === p.id) {
+                    object.splice(index, 1);
+                }
+            });
         }
     }
     if (p.length > 0) {
+        console.clear();
         for (var pr in p) {
-            for (var srv in ser) {
-                if (ser[srv].idp === p[pr].id) {
-                    ventas.items.servicios.splice(ser[srv], 1);
+            ser.forEach(function (car, index, object) {
+                if (car.idp === p[pr].id) {
+                    object.splice(index, 1);
                 }
-            }
-
+            });
         }
     }
 }
 
-//$('#id_producto').append('<option value="' + p.id + '">' + p.nombre + '</option>');
+//const fruits = ["apple", "banana", "cantaloupe", "blueberries", "grapefruit"];
+//
+// const index = fruits.findIndex(fruit => fruit === "blueberries");
+//
+// console.log(index); // 3
+// console.log(fruits[index]); // blueberries
 
