@@ -260,3 +260,16 @@ function reset() {
     $('.is-valid').removeClass('is-valid');
     $('.is-invalid').removeClass('is-invalid');
 }
+
+function blockback() {
+
+ var bPreguntar = true;
+
+    window.onbeforeunload = preguntarAntesDeSalir;
+
+    function preguntarAntesDeSalir()
+    {
+      if (bPreguntar)
+        return "¿Seguro que quieres salir?";
+    }
+}

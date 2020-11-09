@@ -15,14 +15,14 @@ var ventas = {
         var subtotal = 0.00;
         var iva_emp = 0.00;
         $.each(this.items.productos, function (pos, dict) {
-            // dict.subtotal = dict.cantidad * parseFloat(dict.pvp);
-            // subtotal += dict.subtotal;
-            // iva_emp = dict.iva_emp;
+            dict.subtotal = dict.cantidad * parseFloat(dict.pvp);
+            subtotal += dict.subtotal;
+            iva_emp = dict.iva_emp;
         });
         $.each(this.items.servicios, function (pos, dict) {
-            // dict.subtotal = dict.cantidad * parseFloat(dict.pvp);
-            // subtotal += dict.subtotal;
-            // iva_emp = dict.iva_emp;
+            dict.subtotal = dict.cantidad * parseFloat(dict.pvp);
+            subtotal += dict.subtotal;
+            iva_emp = dict.iva_emp;
         });
         this.items.subtotal = subtotal;
         this.items.iva = this.items.subtotal * iva_emp;
@@ -41,7 +41,7 @@ var ventas = {
             destroy: true,
             autoWidth: false,
             dataSrc: "",
-            scrollX: true,
+            responsive: true,
             language: {
                 "url": '//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json'
             },
@@ -96,7 +96,7 @@ var ventas = {
             destroy: true,
             autoWidth: false,
             dataSrc: "",
-            scrollX: true,
+            responsive: true,
             language: {
                 "url": '//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json'
             },
@@ -145,12 +145,21 @@ var ventas = {
 
                     }
                 }],
-            rowCallback: function (row, data) {
-                // $(row).find('input[name="cantidad"]').TouchSpin({
-                //     min: 1,
-                //     max: 100000,
-                //     step: 1
-                // });
+            rowCallback: function (row, data,) {
+                console.clear();
+                console.log(data.idp);
+                if (data.idp > 0) {
+                    $(row).find('input[name="cantidad"]').TouchSpin({
+                        min: 1,
+                        max: 100000,
+                        step: 1
+                    }).attr('disabled', 'disabled');
+                }
+                $(row).find('input[name="cantidad"]').TouchSpin({
+                    min: 1,
+                    max: 100000,
+                    step: 1
+                });
                 $(row).find('input[name="pvp"]').TouchSpin({
                     min: 0.05,
                     max: 1000000,
@@ -167,7 +176,6 @@ var ventas = {
 
 };
 $(function () {
-
     //texto de los selects
     $('.select2').select2({
         "language": {
@@ -177,7 +185,6 @@ $(function () {
         },
         allowClear: true
     });
-
     //seleccionar producto del select producto
     $('#id_producto').on('select2:select', function (e) {
         var crud = $('input[name="crud"]').val();
@@ -191,6 +198,17 @@ $(function () {
             success: function (data) {
                 ventas.add(data['0']);
                 $('#id_producto').val(null).trigger('change');
+                if (data[0]['producto'].instalacion === 1) {
+                    printpdf('Confirmacion!', 'El producto que acaba de agregar requiere instalacion <br> ¿Desear agregar ese servicio a la venta?',
+                        function () {
+                            aggservicio(1, data[0]['id']);
+                            menssaje_ok('Exito!', 'Servicio agregado a la venta <br> ' +
+                                'Porfavor revisa el detalle de servicios', 'fas fa-tags', function () {
+                            })
+                        },
+                        function () {
+                        });
+                }
             },
             error: function (xhr, status, data) {
                 alert(data['0']);
@@ -198,32 +216,26 @@ $(function () {
 
         })
     });
+    //seleccionar servicio del select servicio
     $('#id_servicio').on('select2:select', function (e) {
-        var crudserv = $('input[name="crudserv"]').val();
-        $.ajax({
-            type: "POST",
-            url: crudserv,
-            data: {
-                "id": $('#id_servicio option:selected').val(),
-            },
-            dataType: 'json',
-            success: function (data) {
-                ventas.addserv(data['0']);
-                $('#id_servicio option:selected').remove();
-            },
-            error: function (xhr, status, data) {
-                alert(data['0']);
-            },
-
-        })
+        aggservicio($('#id_servicio option:selected').val(), 0);
     });
-    //cantidad de productos
+    //remover producto del detalle
     $('#tblproductos tbody').on('click', 'a[rel="remove"]', function () {
         var tr = tblventa.cell($(this).closest('td, li')).index();
         borrar_todo_alert('Alerta de Eliminación',
             'Esta seguro que desea eliminar este producto de tu detalle?', function () {
                 var p = ventas.items.productos[tr.row];
                 ventas.items.productos.splice(tr.row, 1);
+                var ser = ventas.items.servicios;
+                if (ser.length !== 0) {
+                    for (var srv in ser) {
+                        if (ser[srv].idp === p.id) {
+                            ventas.items.servicios.splice(ser[srv], 1);
+                        }
+                    }
+                }
+
                 var productos = {'productos': JSON.stringify(ventas.items.productos)};
                 productos['id'] = p.id;
                 productos['key'] = 0;
@@ -234,17 +246,20 @@ $(function () {
                     success: function () {
                         menssaje_ok('Confirmacion!', 'Producto eliminado', 'far fa-smile-wink', function () {
                             ventas.list();
+                            ventas.listserv();
                         });
                     }
                 });
             })
-    }).on('change keyup', 'input[name="pvp"]', function () {
-        var cantidad = parseInt($(this).val());
-        var tr = tblventa.cell($(this).closest('td, li')).index();
-        ventas.items.productos[tr.row].cantidad = cantidad;
-        ventas.calculate();
-        $('td:eq(7)', tblventa.row(tr.row).node()).html('$' + ventas.items.productos[tr.row].subtotal.toFixed(2));
     });
+    //     .on('change keyup', 'input[name="pvp"]', function () {
+    //     var cantidad = parseInt($(this).val());
+    //     var tr = tblventa.cell($(this).closest('td, li')).index();
+    //     ventas.items.productos[tr.row].cantidad = cantidad;
+    //     ventas.calculate();
+    //     $('td:eq(7)', tblventa.row(tr.row).node()).html('$' + ventas.items.productos[tr.row].subtotal.toFixed(2));
+    // });
+    //remover todos los productos del detalle
     $('.btnRemoveall').on('click', function () {
         if (ventas.items.productos.length === 0) return false;
         borrar_todo_alert('Alerta de Eliminación',
@@ -266,8 +281,7 @@ $(function () {
 
             });
     });
-
-
+    //remover servicio del detalle
     $('#tblservicios tbody').on('click', 'a[rel="remove"]', function () {
         var tr = tblservicios.cell($(this).closest('td, li')).index();
         borrar_todo_alert('Alerta de Eliminación',
@@ -281,13 +295,14 @@ $(function () {
                     ventas.listserv();
                 });
             })
-    }).on('change keyup', 'input[name="cantidad"]', function () {
-        var cantidad = parseInt($(this).val());
+    }).on('change keyup', 'input[name="pvp"]', function () {
+        var pvp = parseInt($(this).val());
         var tr = tblservicios.cell($(this).closest('td, li')).index();
-        ventas.items.servicios[tr.row].cantidad = cantidad;
+        ventas.items.servicios[tr.row].pvp = pvp;
         ventas.calculate();
         $('td:eq(4)', tblservicios.row(tr.row).node()).html('$' + ventas.items.servicios[tr.row].subtotal.toFixed(2));
     });
+    //boton guardar
     $('#save').on('click', function () {
         if ($('select[name="cliente"]').val() === "") {
             menssaje_error('Error!', "Debe seleccionar un cliente", 'far fa-times-circle');
@@ -316,9 +331,11 @@ $(function () {
             });
 
     });
+    //boton agregar cliente
     $('#id_new_client').on('click', function () {
         $('#Modal').modal('show');
     });
+    //enviar formulario de nuevo cliente
     $('#form').on('submit', function (e) {
         e.preventDefault();
         var parametros = new FormData(this);
@@ -337,6 +354,7 @@ $(function () {
         }
 
     });
+    //buscar cliente en el select cliente
     $('#id_cliente').select2({
         theme: "classic",
         language: {
@@ -372,10 +390,12 @@ $(function () {
         placeholder: 'Busca un cliente',
         minimumInputLength: 1,
     });
+    //mostrar el modal con el formulario cliente
     $('#Modal').on('hidden.bs.modal', function (e) {
         reset();
         $('#form').trigger("reset");
     });
+    //buscar produto del select cliente
     $('#id_producto').select2({
         theme: "classic",
         language: {
@@ -411,9 +431,29 @@ $(function () {
         placeholder: 'Busca un Producto',
         minimumInputLength: 1,
     });
-
-
 });
+
+
+function aggservicio(id, idp) {
+    var crudserv = $('input[name="crudserv"]').val();
+    $.ajax({
+        type: "POST",
+        url: crudserv,
+        data: {
+            "id": id,
+        },
+        dataType: 'json',
+        success: function (data) {
+            data[0]['idp'] = idp;
+            ventas.addserv(data[0]);
+            $('#id_servicio').val(null).trigger('change');
+        },
+        error: function (xhr, status, data) {
+            alert(data['0']);
+        },
+
+    })
+}
 
 //$('#id_producto').append('<option value="' + p.id + '">' + p.nombre + '</option>');
 

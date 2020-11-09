@@ -265,7 +265,7 @@ def get_servicio(request):
             data = []
             for i in servicio:
                 item = i.toJSON()
-                item['pvp'] = 0.00
+                item['pvp'] = 0.05
                 item['cantidad'] = 1
                 item['subtotal'] = 0.00
                 item['iva_emp'] = iva_emp.iva / 100

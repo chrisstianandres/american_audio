@@ -1,21 +1,16 @@
 import json
 
-import goslate
 from django.db import transaction
-from django.db.models import Q, Max, Count, Sum
-from django.http import HttpResponseRedirect, HttpResponse
+from django.db.models import Q, Max
+from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView
 
 from apps.backEnd import nombre_empresa
-from apps.cliente.forms import ClienteForm
-from apps.cliente.models import Cliente
-from apps.empleado.models import Empleado
 from apps.inventario.models import Inventario
 from apps.producto.models import Producto
-from apps.proveedor.models import Proveedor
 
 opc_icono = 'fas fa-warehouse'
 opc_entidad = 'Inventario'
@@ -187,7 +182,6 @@ def remove_select(request):
                     data['resp'] = True
         elif pik:
             ps = Inventario.objects.get(pk=pik)
-            print(ps)
             ps.select = 0
             ps.save()
             data['resp'] = True
