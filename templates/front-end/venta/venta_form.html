@@ -129,7 +129,7 @@
                                 {% csrf_token %}
                                 <div class="form-group">
                                     <label for="id_fecha_venta">{{ form.fecha_venta.label_tag }}</label>
-                                     <div class="input-group">
+                                    <div class="input-group">
                                         {{ form.fecha_venta }}
                                         <div class="input-group-append">
                                             <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
@@ -160,7 +160,7 @@
                                 <div class="form-group">
                                     <label for="id_iva">{{ form.iva.label_tag }}</label>
                                     <div class="input-group">
-                                       {{ form.iva }}
+                                        {{ form.iva }}
                                         <div class="input-group-append">
                                             <span class="input-group-text">$</span>
                                         </div>
@@ -168,8 +168,8 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="id_total">{{ form.total.label_tag }}</label>
-                                   <div class="input-group">
-                                       {{ form.total }}
+                                    <div class="input-group">
+                                        {{ form.total }}
                                         <div class="input-group-append">
                                             <span class="input-group-text">$</span>
                                         </div>
@@ -211,12 +211,23 @@
                     </div>
                     <div class="modal-body" met>
                         <div class="container-fluid">
-                            <div class="form-group">
-                                {{ formc.as_p }}
-                            </div>
-                            <div class="form-group">
-                                <input type="hidden" value="{{ action }}">
-                            </div>
+                            {#                            <div class="form-group">#}
+                            {#                                {{ formc.as_p }}#}
+                            {#                            </div>#}
+                            {#                            <div class="form-group">#}
+                            {#                                <input type="hidden" value="{{ action }}">#}
+                            {#                            </div>#}
+                            {% for field in formc.visible_fields %}
+                                <div class="form-group col-lg-12">
+                                    <label style="font-size: 13px;"
+                                           class="col-lg-3 control-label"><strong>{{ field.label }}:</strong></label>
+                                    <label class="badge bg-important">{{ field.errors }}</label>
+                                    <div class="col-lg-10">
+                                        {% csrf_token %}
+                                        {{ field }}
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
 
                     </div>
@@ -246,8 +257,11 @@
     <script src="{% static 'apps/cliente/cliente.js' %}"></script>
     <script src="{% static 'apps/funtions.js' %}"></script>
     <script>
-        {#ventas.items.productos = {{ detalle|safe }};#}
         ventas.list();
         ventas.listserv();
+        {% for errors in formc.errors %}
+            var err = {{ errors }};
+            alert(err);
+        {% endfor %}
     </script>
 {% endblock %}

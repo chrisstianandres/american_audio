@@ -27,6 +27,7 @@ urlpatterns = [
     path('login/', backEnd.logeo, name='login'),
     path('logout/', backEnd.disconnect, name='logout'),
     path('connect/', backEnd.connect, name='connect'),
+    path('database_backup/', include('apps.DatabaseBackups.urls', namespace='database_backup')),
     path('empresa/', include('apps.empresa.urls', namespace='empresa')),
     path('cliente/', include('apps.cliente.urls', namespace='cliente')),
     path('cargo/', include('apps.cargo.urls', namespace='cargo')),

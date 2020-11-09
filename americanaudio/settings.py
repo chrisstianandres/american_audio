@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'apps.tipogasto',
     'apps.gasto',
     'apps.delvoluciones_venta',
+    'apps.DatabaseBackups',
 
 ]
 

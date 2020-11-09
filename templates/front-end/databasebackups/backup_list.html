@@ -1,0 +1,32 @@
+{% extends 'front-end/list.html' %}
+{% load static %}
+{% block table %}
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Fecha</th>
+        <th class="text-center">Descargar</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% if object_list %}
+        {% for dato in object_list %}
+            <tr>
+                <td>{{ dato.id }}</td>
+                <td>{{ dato.fecha }}</td>
+                <td><a type="button" class="btn btn-success btn-xs" data-toggle="tooltip"
+                       title="Descargar"
+                       href="{{ dato.archive.url }}"><i class="fas fa-download"></i></a>
+                    <a type="button" class="btn btn-danger btn-xs"
+                            data-toggle="tooltip"
+                            title="Eliminar" rel="del">
+                        <i class="fa fa-trash"></i></a>
+            </tr>
+        {% endfor %}
+    {% endif %}
+    </tbody>
+{% endblock %}
+{% block extra %}
+{# <script src="{% static 'apps/cliente/cliente_list.js' %}"></script>#}
+ <script src="{% static 'apps/funtions.js' %}"></script>
+{% endblock %}

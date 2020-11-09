@@ -15,6 +15,7 @@ from apps.empleado.models import Empleado
 from apps.proveedor.models import Proveedor
 import goslate
 
+
 opc_icono = 'fa fa-user'
 opc_entidad = 'Clientes'
 crud = '/cliente/crear'
@@ -91,28 +92,27 @@ def crear(request):
 @csrf_exempt
 def crearcli(request):
     data = {}
+    f = ClienteForm(request.POST)
     try:
         if request.method == 'POST':
             if Proveedor.objects.filter(documento=0, numero_documento=request.POST['cedula']):
-                data['error'] = 'Numero de Cedula ya exitente en los Proveedores'
+                f.add_error("cedula", "Numero de Cedula ya exitente en los Proveedores")
+                data['error'] = f.errors
             elif Empleado.objects.filter(cedula=request.POST['cedula']):
-                data['error'] = 'Numero de Cedula ya exitente en los Empleados'
+                f.add_error("cedula", "Numero de Cedula ya exitente en los Empleados")
+                data['error'] = f.errors
             elif verificar(request.POST['cedula']):
                 with transaction.atomic():
-                    f = ClienteForm(request.POST)
                     if f.is_valid():
                         var = f.save()
                         data['resp'] = True
                         data['cliente'] = var.toJSON()
                         return JsonResponse(data)
                     else:
-                        errores=[]
-                        c= '\n'
-                        for a in f.errors:
-                            errores.append('El campo '+ a + ' esta ya existe <br/>')
-                        data['error'] = errores
+                        data['error'] = f.errors
             else:
-                data['error'] = 'Numero de Cedula no valido para Ecuador'
+                f.add_error("cedula", "Numero de Cedula no valido para Ecuador")
+                data['error'] = f.errors
     except Exception as e:
         gs = goslate.Goslate()
         data['error'] = gs.translate(str(e), 'es')

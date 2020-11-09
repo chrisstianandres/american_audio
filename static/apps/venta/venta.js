@@ -351,7 +351,6 @@ $(function () {
                 function (response) {
                     menssaje_ok('Exito!', 'Exito al guardar este cliente!', 'far fa-smile-wink', function () {
                         $('#Modal').modal('hide');
-                        console.log(response);
                         var newOption = new Option(response.cliente['full_name'], response.cliente['id'], false, true);
                         $('#id_cliente').append(newOption).trigger('change');
                     });

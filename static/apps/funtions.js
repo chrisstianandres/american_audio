@@ -236,7 +236,7 @@ function save_with_ajax2(title, url, content, parametros, callback) {
                             callback(data);
                             return false;
                         }
-                        menssaje_error('Error', data.error, 'fas fa-exclamation-circle');
+                        menssaje_error_form('Error', data.error, 'fas fa-exclamation-circle');
 
                     }).fail(function (jqXHR, textStatus, errorThrown) {
                         alert(textStatus + ': ' + errorThrown);
@@ -261,15 +261,24 @@ function reset() {
     $('.is-invalid').removeClass('is-invalid');
 }
 
-function blockback() {
-
- var bPreguntar = true;
-
-    window.onbeforeunload = preguntarAntesDeSalir;
-
-    function preguntarAntesDeSalir()
-    {
-      if (bPreguntar)
-        return "¿Seguro que quieres salir?";
-    }
+function menssaje_error_form(title, content, icon, callback) {
+    var html = '<ul>';
+    $.each(content, function (key, value) {
+        html += '<li>'+ key+': '+ value+ '</li>'
+    });
+    html+='</ul>';
+    $.confirm({
+        theme: 'modern',
+        icon: icon,
+        title: title,
+        type: 'red',
+        content: html,
+        draggable: true,
+        buttons: {
+            info: {
+                text: '<i class="fas fa-check"></i> Ok',
+                btnClass: 'btn-blue'
+            },
+        }
+    });
 }
