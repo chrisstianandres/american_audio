@@ -67,7 +67,7 @@ function save_with_ajax(title, url, content, parametros, callback) {
 function save_estado(title, url, content, parametros, callback) {
     $.confirm({
         theme: 'modern',
-        type: 'blue',
+        type: 'red',
         icon: 'fas fa-exclamation-circle',
         title: title,
         content: content,

@@ -240,7 +240,7 @@ def profile(request):
     crud = '/empleado/profile'
     data = {
         'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud,
-        'boton': 'Guardar Empleado', 'action': 'add', 'titulo': 'Perfil de Usuario'
+        'boton': 'Guardar Empleado', 'action': 'add', 'titulo': 'Perfil de Usuario', 'empresa': nombre_empresa()
     }
     if request.method == 'GET':
         form = EmpleadoForm(instance=empleado)
