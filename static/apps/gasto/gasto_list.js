@@ -66,7 +66,7 @@ $(function () {
         dom: 'l<"toolbar">' + "<br>" + 'Bfrtip ',
         buttons: [
             {
-                className: 'btn-default my_class', extend: 'searchPanes', config: {
+                className: 'btn btn-light my_class', extend: 'searchPanes', config: {
                     cascadePanes: true,
                     viewTotal: true,
                     layout: 'columns-4'
@@ -158,7 +158,14 @@ $(function () {
             {
                 text: '<i class="fa fa-file-excel"></i> Reporte Excel', className: "btn btn-success my_class",
                 extend: 'excel'
-            }
+            },
+            {
+                className: 'btn btn-info',
+                text: '<i class="far fa-keyboard"></i> &nbsp;Tipo de Gasto</a>',
+                action: function (e, dt, node, config) {
+                    window.location.href = '/tipo_gasto/lista'
+                }
+            },
         ],
         columnDefs: [
             {
@@ -169,6 +176,13 @@ $(function () {
                     var devolver = '<a type="button" rel="eliminar" class="btn btn-danger btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Eliminar"><i class="fa fa-trash"></i></a>';
                     var editar = '<a type="button" href= "/gasto/editar/' + row[0] + '" rel="edit" class="btn btn-success btn-sm btn-round" style="color: white" data-toggle="tooltip" title="Editar"><i class="fa fa-edit"></i></a>'+ ' ';
                     return editar + devolver;
+                }
+            },
+             {
+                targets: [3],
+                class: 'text-center',
+                render: function (data, type, row) {
+                    return '$ '+ parseFloat(data).toFixed(2);
                 }
             },
             {

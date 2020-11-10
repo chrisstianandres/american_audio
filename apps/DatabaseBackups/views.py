@@ -21,7 +21,6 @@ from apps.backEnd import nombre_empresa, JsonResponse
 opc_icono = 'fas fa-database'
 opc_entidad = 'Respaldo de Base de Datos'
 crud = '/database_backup/nuevo'
-ruta = '/path/media/'
 empresa = nombre_empresa()
 
 
@@ -36,7 +35,7 @@ class DatabaseBackupsListView(ListView):
 
     def post(self, request, *args, **kwargs):
         data = {}
-        action = request.POST.get('action', None)
+        action = request.POST['action']
         try:
             if action == 'delete_access_all':
                 for d in DatabaseBackups.objects.all():

@@ -1,16 +1,9 @@
-import json
-
-from django.db import transaction
-from django.db.models import Q
-from django.http import HttpResponse
 from django.http import JsonResponse
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView
 
 from apps.backEnd import nombre_empresa
 from apps.delvoluciones_venta.models import Devolucion
-from apps.producto.models import Producto
 
 opc_icono = 'fas fa-exchange-alt'
 opc_entidad = 'Devoluciones de ventas'

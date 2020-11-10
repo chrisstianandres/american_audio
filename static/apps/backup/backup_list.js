@@ -29,4 +29,16 @@ $(function () {
             });
     });
 
+    $('#delete_all').on('click', function () {
+        var parametros = {'action': 'delete_access_all'};
+        save_estado('Alerta',
+            '/database_backup/lista', 'Esta seguro que desea eliminar todos los respaldos?', parametros,
+            function () {
+                menssaje_ok('Exito!', 'Exito al eliminar los respaldos!', 'far fa-smile-wink', function () {
+                    location.reload();
+                })
+            });
+
+    })
+
 });

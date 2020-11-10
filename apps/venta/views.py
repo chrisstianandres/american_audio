@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from django.db.models.functions import Coalesce
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -394,6 +394,9 @@ def grap(request):
                 'chart3': {
                     'compras': datachartcontr(),
                     'ventas': grap_data()
+                },
+                'tarjets': {
+                    'data': data_tarjets()
                 }
             }
         else:
@@ -411,6 +414,20 @@ def grap_data():
             r=Coalesce(Sum('total'), 0)).get('r')
         data.append(float(total))
     return data
+
+
+def data_tarjets():
+    year = datetime.now().year
+    ventas = Venta.objects.filter(fecha_venta__year=year, estado=1).aggregate(r=Coalesce(Count('id'), 0)).get('r')
+    compras = Compra.objects.filter(fecha_compra__year=year, estado=1).aggregate(r=Coalesce(Count('id'), 0)).get('r')
+    inventario = Inventario.objects.filter(compra__fecha_compra__year=year, estado=1).aggregate(r=Coalesce(Count('id'), 0)).get('r')
+    data = {
+        'ventas': int(ventas),
+        'compras': int(compras),
+        'inventario': int(inventario),
+    }
+    return data
+
 
 
 def dataChart2():

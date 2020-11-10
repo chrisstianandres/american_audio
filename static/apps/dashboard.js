@@ -87,7 +87,6 @@ function cahrtventas() {
         data: {'action': 'chart'},
         dataSrc: "",
     }).done(function (data) {
-        console.log(data['chart3'].ventas);
         chart.addSeries(data['dat']);
         grapie.addSeries(
             {
@@ -108,7 +107,12 @@ function cahrtventas() {
                 name: 'Ventas',
                 data: data['chart3'].ventas
             }
-        )
+        );
+        var tarjets = data['tarjets'];
+       $('#venta_tarjet').html(parseInt(tarjets['data'].ventas)+ '&nbsp;'+'<i class="fas fa-cart-arrow-down"></i>');
+       $('#compra_tarjet').html(parseInt(tarjets['data'].compras)+ '&nbsp;'+'<i class="fab fa-shopify"></i>');
+       $('#inv_tarjet').html(parseInt(tarjets['data'].inventario)+ '&nbsp;'+'<i class="fab fa-amazon"></i>');
+        console.log(tarjets['data'].ventas)
     });
 }
 

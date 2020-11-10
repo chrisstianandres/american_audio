@@ -7,7 +7,7 @@
         <div class="col-xl-4 col-md-6">
             <div class="card bg-primary text-white mb-4">
                 <div class="card-header"> Ventas realizadas en el Año</div>
-                <div class="card-body"> <div class="text-center"><h1>15 &nbsp;<i class="fas fa-calculator"></i></h1></div></div>
+                <div class="card-body"> <div class="text-center"><h1 id="venta_tarjet"> &nbsp;</h1></div></div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
                     <a class="small text-white stretched-link" href="{% url 'venta:lista' %}">Ver más</a>
                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
@@ -17,7 +17,7 @@
         <div class="col-xl-4 col-md-6">
             <div class="card bg-warning text-white mb-4">
                 <div class="card-header"> Compras realizadas en el Año</div>
-                <div class="card-body"><div class="text-center"><h1>17 &nbsp;<i class="fab fa-shopify"></i></h1></div></div>
+                <div class="card-body"><div class="text-center"><h1 id="compra_tarjet"></h1></div></div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
                     <a class="small text-white stretched-link" href="{% url 'compra:lista' %}">Ver más</a>
                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>
@@ -27,7 +27,7 @@
         <div class="col-xl-4 col-md-6">
             <div class="card bg-success text-white mb-4">
                 <div class="card-header"> Productos en Inventario</div>
-                <div class="card-body"><div class="text-center"><h1>28 &nbsp;<i class="fab fa-amazon"></i></h1></div></div>
+                <div class="card-body"><div class="text-center"><h1 id="inv_tarjet"></h1></div></div>
                 <div class="card-footer d-flex align-items-center justify-content-between">
                     <a class="small text-white stretched-link" href="{% url 'producto:lista' %}">Ver más</a>
                     <div class="small text-white"><i class="fas fa-angle-right"></i></div>

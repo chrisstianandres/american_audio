@@ -25,5 +25,6 @@ urlpatterns = [
     path('report_total', login_required(report_total.as_view()), name='report_total'),
     path('data_report', login_required(views.data_report), name='data_report'),
     path('data_report_total', login_required(views.data_report_total), name='data_report_total'),
+    path('data_tarjets', login_required(views.data_tarjets), name='data_tarjets'),
 
 ]
