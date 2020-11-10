@@ -28,8 +28,8 @@
                        title="Editar Datos"
                        href="{% url 'cliente:editar' dato.id %}"><i class="fa fa-edit"></i></a>
                     <a type="button" class="btn btn-danger btn-xs"
-                            data-toggle="tooltip"
-                            title="Eliminar" rel="del">
+                       data-toggle="tooltip"
+                       title="Eliminar" rel="del">
                         <i class="fa fa-trash"></i></a>
             </tr>
         {% endfor %}
@@ -37,6 +37,5 @@
     </tbody>
 {% endblock %}
 {% block extra %}
- <script src="{% static 'apps/cliente/cliente_list.js' %}"></script>
- <script src="{% static 'apps/funtions.js' %}"></script>
+    <script src="{% static 'apps/cliente/cliente_list.js' %}"></script>
 {% endblock %}

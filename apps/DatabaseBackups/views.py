@@ -6,7 +6,8 @@ import shlex
 
 from django.core.files import File
 from django.db import connection
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -48,8 +49,12 @@ class DatabaseBackupsListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Listado de respaldos de la base de datos'
-        context['create_url'] = reverse_lazy('databasebackups_create')
+        context['titulo'] = 'Listado de respaldos de la base de datos'
+        context['nuevo'] = reverse_lazy('database_backup:nuevo')
+        context['icono'] = opc_icono
+        context['entidad'] = opc_entidad
+        context['boton'] = 'Crear Respaldo'
+        context['empresa'] = empresa
         return context
 
 
@@ -110,9 +115,10 @@ class DatabaseBackupsCreateView(TemplateView):
         try:
             db_name = connection.settings_dict['NAME']
             data_now = '{0:%Y_%m_%d}'.format(datetime.now())
-            name_backup = "{}_{}.backup".format('backup', data_now)
-            script = 'mysqldump -u user_bd -p123456 {} >{}'.format(db_name, name_backup)
-            subprocess.call(script, shell=True)
+            name_backup = "{}_{}.sql".format('backup', data_now)
+            script = 'mysqldump -u root -p 123456 {} >{}'.format(db_name, name_backup)
+            print(script)
+            subprocess.run(script, shell=True)
             file = os.path.join(BASE_DIR, name_backup)
             db = DatabaseBackups()
             db.user = self.request.user
@@ -137,6 +143,7 @@ class DatabaseBackupsCreateView(TemplateView):
                     data = self.create_backup_postgresql()
                 elif db_type == 'mysql':
                     data = self.create_backup_mysql()
+                    return HttpResponseRedirect(self.success_url)
                 else:
                     data['error'] = 'No se ha podido sacar el respaldo de la base de datos {}'.format(db_type)
             else:
@@ -147,7 +154,7 @@ class DatabaseBackupsCreateView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
-        context['list_url'] = self.success_url
+        context['crud'] = crud
         context['titulo'] = 'Nuevo registro de un Respaldo de Base de Datos'
         context['empresa'] = nombre_empresa()
         context['entidad'] = opc_entidad

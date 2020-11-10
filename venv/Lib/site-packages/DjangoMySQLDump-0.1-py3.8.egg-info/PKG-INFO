@@ -1,0 +1,33 @@
+Metadata-Version: 1.0
+Name: DjangoMySQLDump
+Version: 0.1
+Summary: Simple dump tool to automate dumps, for example during automated deploys
+Home-page: http://pypi.python.org/pypi/DjangoMySQLDump/
+Author: Geert Dekkers
+Author-email: geert@djangowebstudio.nl
+License: LICENSE.txt
+Description: DJANGO MYSQLDUMP
+        ----------------
+        
+        Simple dump tool to automate dumps, for example during automated deploys
+        Works with older django versions (< 1.3)
+        
+        Dumps the default database when it is mysql. 
+        Preferably to be triggered by a cron job, or launchd on macosx.
+        Could also be triggered by Scheduler on Windows, but we're not using Windows, are we?
+        
+        Produces a timestamped dump which could be used for rollback.
+        Takes app specific settings, to be found in settings.py
+        
+        # Required settings
+        # -----------------
+        APP_LOGS_ROOT
+        APP_DUMP_PATH
+        
+        # Optional settings
+        # -----------------
+        APP_MYSQLDUMP_PATH = 'usr/bin' #(path to mysqldump, default is /usr/bin)
+        APP_DB_ROLLBACKS = 60 #(no. of rollbacks, default 60)
+        
+Keywords: django mysql dump
+Platform: UNKNOWN

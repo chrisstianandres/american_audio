@@ -35,7 +35,6 @@
 {% block script %}
 
     <script src="{% static 'apps/inventario/inventario.js' %}"></script>
-    <script src="{% static 'apps/funtions.js' %}"></script>
     <script>
         inventario.items.prod = {{ list|safe }};
         inventario.list();
