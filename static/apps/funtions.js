@@ -151,6 +151,7 @@ function menssaje_error(title, content, icon, callback) {
         }
     });
 }
+
 function error_login(title, content, icon, callback) {
     $.confirm({
         theme: 'modern',
@@ -171,6 +172,7 @@ function error_login(title, content, icon, callback) {
         }
     });
 }
+
 function menssaje_ok(title, content, icon, callback) {
     $.confirm({
         theme: 'modern',
@@ -264,9 +266,9 @@ function reset() {
 function menssaje_error_form(title, content, icon, callback) {
     var html = '<ul>';
     $.each(content, function (key, value) {
-        html += '<li>'+ key+': '+ value+ '</li>'
+        html += '<li>' + key + ': ' + value + '</li>'
     });
-    html+='</ul>';
+    html += '</ul>';
     $.confirm({
         theme: 'modern',
         icon: icon,

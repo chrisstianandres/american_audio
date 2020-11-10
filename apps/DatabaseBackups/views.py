@@ -16,7 +16,7 @@ from django.views.generic import ListView, DeleteView, TemplateView
 from americanaudio.settings import BASE_DIR
 # from core.security.mixins import AccessModuleMixin, PermissionModuleMixin
 from apps.DatabaseBackups.models import DatabaseBackups
-from apps.backEnd import nombre_empresa
+from apps.backEnd import nombre_empresa, JsonResponse
 
 opc_icono = 'fas fa-database'
 opc_entidad = 'Respaldo de Base de Datos'
@@ -116,14 +116,17 @@ class DatabaseBackupsCreateView(TemplateView):
             db_name = connection.settings_dict['NAME']
             data_now = '{0:%Y_%m_%d}'.format(datetime.now())
             name_backup = "{}_{}.sql".format('backup', data_now)
-            script = 'mysqldump -u root -p 123456 {} >{}'.format(db_name, name_backup)
-            print(script)
+            script = 'mysqldump -u user_bd -p123456 {} >{}'.format(db_name, name_backup)
             subprocess.run(script, shell=True)
             file = os.path.join(BASE_DIR, name_backup)
-            db = DatabaseBackups()
-            db.user = self.request.user
-            db.archive.save(name_backup, File(open(file, 'rb')), save=False)
-            db.save()
+            check = DatabaseBackups.objects.filter(fecha=datetime.now())
+            if check:
+                data['error'] = 'Ya existe un respaldo realizado el dia de hoy'
+            else:
+                db = DatabaseBackups()
+                db.user = self.request.user
+                db.archive.save(name_backup, File(open(file, 'rb')), save=False)
+                db.save()
         except Exception as e:
             data['error'] = str(e)
         finally:
@@ -143,7 +146,6 @@ class DatabaseBackupsCreateView(TemplateView):
                     data = self.create_backup_postgresql()
                 elif db_type == 'mysql':
                     data = self.create_backup_mysql()
-                    return HttpResponseRedirect(self.success_url)
                 else:
                     data['error'] = 'No se ha podido sacar el respaldo de la base de datos {}'.format(db_type)
             else:
@@ -186,3 +188,19 @@ class DatabaseBackupsCreateView(TemplateView):
 #         context['title'] = 'Notificación de eliminación'
 #         context['list_url'] = self.success_url
 #         return context
+
+
+@csrf_exempt
+def eliminar(request):
+    data = {}
+    try:
+        id = request.POST['id']
+        if id:
+            ps = DatabaseBackups.objects.get(pk=id)
+            ps.delete()
+            data['resp'] = True
+        else:
+            data['error'] = 'Ha ocurrido un error'
+    except Exception as e:
+        data['error'] = str(e)
+    return JsonResponse(data)

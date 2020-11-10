@@ -113,14 +113,14 @@ def crear(request):
                     for i in datos['productos']:
                         dv = Detalle_venta()
                         dv.venta_id = c.id
-                        dv.producto_id = i['id']
+                        dv.producto_id = i['producto']['id']
                         dv.cantidadp = int(i['cantidad'])
-                        x = Producto.objects.get(pk=i['id'])
+                        x = Producto.objects.get(pk=i['producto']['id'])
                         dv.pvp_actual = float(x.pvp)
                         x.stock = x.stock - int(i['cantidad'])
                         dv.subtotalp = float(i['subtotal'])
                         x.save()
-                        inv = Inventario.objects.filter(producto_id=i['id'], estado=1)[:i['cantidad']]
+                        inv = Inventario.objects.filter(producto_id=i['producto']['id'], estado=1)[:i['cantidad']]
                         for itr in inv:
                             x = Inventario.objects.get(pk=itr.id)
                             x.estado = 0
@@ -138,14 +138,14 @@ def crear(request):
                     for i in datos['productos']:
                         dv = Detalle_venta()
                         dv.venta_id = c.id
-                        dv.producto_id = i['id']
+                        dv.producto_id = i['producto']['id']
                         dv.cantidadp = int(i['cantidad'])
                         dv.subtotalp = float(i['subtotal'])
-                        x = Producto.objects.get(pk=i['id'])
+                        x = Producto.objects.get(pk=i['producto']['id'])
                         dv.pvp_actual = float(x.pvp)
                         x.stock = x.stock - int(i['cantidad'])
                         x.save()
-                        inv = Inventario.objects.filter(producto_id=i['id'], estado=1)[:i['cantidad']]
+                        inv = Inventario.objects.filter(producto_id=i['producto']['id'], estado=1)[:i['cantidad']]
                         for itr in inv:
                             x = Inventario.objects.get(pk=itr.id)
                             x.estado = 0
@@ -316,7 +316,7 @@ def get_detalle_serv(request):
                     data.append({
                         'servicio': p.servicio.nombre,
                         'cantidad': p.cantidads,
-                        'pvp': (p.pvp_actual_s * 100) / (empresa.iva + 100),
+                        'pvp': (p.pvp_actual_s),
                         'subtotal': p.subtotals
                     })
         else:
@@ -343,8 +343,11 @@ def estado(request):
                     ch = Producto.objects.get(pk=i.producto.pk)
                     ch.stock = int(ch.stock) + int(i.cantidadp)
                     ch.save()
+                    print(id)
                     for a in Inventario.objects.filter(venta_id=id):
+                        print(a)
                         a.estado = 1
+                        a.select = 0
                         a.venta_id = None
                         a.save()
                 es.save()

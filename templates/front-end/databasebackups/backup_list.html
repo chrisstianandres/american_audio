@@ -16,12 +16,12 @@
                 <td>{{ dato.id }}</td>
                 <td>{{ dato.fecha }}</td>
                 <td>{{ dato.archive }}</td>
-                <td><a type="button" class="btn btn-success btn-xs" data-toggle="tooltip"
+                <td><a type="button" class="btn btn-success btn-sm" data-toggle="tooltip"
                        title="Descargar"
                        href="{{ dato.archive.url }}"><i class="fas fa-download"></i></a>
-                    <a type="button" class="btn btn-danger btn-xs"
+                    <a type="button" class="btn btn-danger btn-sm"
                             data-toggle="tooltip"
-                            title="Eliminar" rel="del">
+                            title="Eliminar" rel="del" style="color: white">
                         <i class="fa fa-trash"></i></a>
             </tr>
         {% endfor %}
@@ -29,5 +29,5 @@
     </tbody>
 {% endblock %}
 {% block extra %}
-{# <script src="{% static 'apps/cliente/cliente_list.js' %}"></script>#}
+ <script src="{% static 'apps/backup/backup_list.js' %}"></script>
 {% endblock %}

@@ -470,7 +470,6 @@ function checkserv(ser, p) {
         }
     }
     if (p.length > 0) {
-        console.clear();
         for (var pr in p) {
             ser.forEach(function (car, index, object) {
                 if (car.idp === p[pr].id) {
@@ -481,6 +480,23 @@ function checkserv(ser, p) {
     }
 }
 
+function cancel() {
+    var productos = {'productos': JSON.stringify(ventas.items.productos)};
+    productos['id'] = 0;
+    productos['key'] = 1;
+    $.ajax({
+        url: '/inventario/remove_select',
+        type: 'POST',
+        data: productos,
+        success: function () {
+            checkserv(ventas.items.servicios, ventas.items.productos);
+            window.history.back();
+        }
+    });
+
+}
+
+//
 //const fruits = ["apple", "banana", "cantaloupe", "blueberries", "grapefruit"];
 //
 // const index = fruits.findIndex(fruit => fruit === "blueberries");
