@@ -24,7 +24,7 @@ SECRET_KEY = '$&x==s7z4t(pr-029$thopwu=w-q_=+pqp@ij_dl%2-n&^^380'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['http://americanaudio.pythonanywhere.com', '127.0.0.1' ]
 
 # Application definition
 
@@ -36,9 +36,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.apps.AppsConfig',
-
-    # sistema
-
     # apps instaladas
     'apps.cargo',
     'apps.categoria',

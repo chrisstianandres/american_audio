@@ -540,134 +540,91 @@ def data_report(request):
             if start_date == '' and end_date == '':
                 query = Detalle_venta.objects.exclude(cantidadp=0).values('venta__fecha_venta', 'producto__nombre',
                                                                           'pvp_actual').order_by().annotate(
-                    Sum('cantidadp')).filter(estado=1)
-                for p in query:
-                    total = p['pvp_actual'] * p['cantidadp__sum']
-                    data.append([
-                        p['venta__fecha_venta'].strftime("%d/%m/%Y"),
-                        p['producto__nombre'],
-                        'Producto',
-                        int(p['cantidadp__sum']),
-                        format(p['pvp_actual'], '.2f'),
-                        format((total * 100) / (100 + empresa.iva), '.2f'),
-                        format(float(total) * iva, '.2f'),
-                        format(total, '.2f')
-                    ])
+                    Sum('cantidadp')).filter(venta__estado=1)
             else:
                 query = Detalle_venta.objects.exclude(cantidadp=0).values('venta__fecha_venta', 'producto__nombre',
                                                                           'pvp_actual') \
-                    .filter(venta__fecha_venta__range=[start_date, end_date], estado=1).order_by().annotate(
+                    .filter(venta__fecha_venta__range=[start_date, end_date], venta__estado=1).order_by().annotate(
                     Sum('cantidadp'))
-                for p in query:
-                    total = p['pvp_actual'] * p['cantidadp__sum']
-                    data.append([
-                        p['venta__fecha_venta'].strftime("%d/%m/%Y"),
-                        p['producto__nombre'],
-                        'Producto',
-                        int(p['cantidadp__sum']),
-                        format(p['pvp_actual'], '.2f'),
-                        format((total * 100) / (100 + empresa.iva), '.2f'),
-                        format(float(total) * iva, '.2f'),
-                        format(total, '.2f')
-                    ])
+            for p in query:
+                total = p['pvp_actual'] * p['cantidadp__sum']
+                total_sin_iva = float((total * 100) / (100 + empresa.iva))
+                data.append([
+                    p['venta__fecha_venta'].strftime("%d/%m/%Y"),
+                    p['producto__nombre'],
+                    'Producto',
+                    int(p['cantidadp__sum']),
+                    format(p['pvp_actual'], '.2f'),
+                    format(total_sin_iva, '.2f'),
+                    format(total_sin_iva * iva, '.2f'),
+                    format(total, '.2f')
+                ])
         elif int(tipo) == 2:
             if start_date == '' and end_date == '':
                 query = Detalle_venta.objects.exclude(cantidads=0).values('venta__fecha_venta', 'servicio__nombre',
                                                                           'pvp_actual_s').annotate(
-                    Sum('cantidads')).filter(estado=1)
-                for p in query:
-                    total = p['pvp_actual_s'] * p['cantidads__sum']
-
-                    data.append([
-                        p['venta__fecha_venta'].strftime("%d/%m/%Y"),
-                        p['servicio__nombre'],
-                        'Servicio',
-                        int(p['cantidads__sum']),
-                        format(p['pvp_actual_s'], '.2f'),
-                        format((total * 100) / (100 + empresa.iva), '.2f'),
-                        format(float(total) * iva, '.2f'),
-                        format(total, '.2f')
-                    ])
+                    Sum('cantidads')).filter(venta__estado=1)
             else:
                 query = Detalle_venta.objects.exclude(cantidads=0).values('venta__fecha_venta', 'servicio__nombre',
                                                                           'pvp_actual_s') \
-                    .filter(venta__fecha_venta__range=[start_date, end_date], estado=1).annotate(Sum('cantidads'))
-                for p in query:
-                    total = p['pvp_actual_s'] * p['cantidads__sum']
-                    data.append([
-                        p['venta__fecha_venta'].strftime("%d/%m/%Y"),
-                        p['servicio__nombre'],
-                        'Servicio',
-                        int(p['cantidads__sum']),
-                        format(p['pvp_actual_s'], '.2f'),
-                        format((total * 100) / (100 + empresa.iva), '.2f'),
-                        format(float(total) * iva, '.2f'),
-                        format(total, '.2f')
-                    ])
+                    .filter(venta__fecha_venta__range=[start_date, end_date], venta__estado=1).annotate(Sum('cantidads'))
+            for p in query:
+                total = p['pvp_actual_s'] * p['cantidads__sum']
+                total_sin_iva = float((total * 100) / (100 + empresa.iva))
+                print(p['servicio__nombre'])
+                data.append([
+                    p['venta__fecha_venta'].strftime("%d/%m/%Y"),
+                    p['servicio__nombre'],
+                    'Servicio',
+                    int(p['cantidads__sum']),
+                    format(p['pvp_actual_s'], '.2f'),
+                    format(total_sin_iva, '.2f'),
+                    format(total_sin_iva * iva, '.2f'),
+                    format(total, '.2f')
+                ])
         else:
             if start_date == '' and end_date == '':
                 query = Detalle_venta.objects.exclude(cantidadp=0).values('venta__fecha_venta', 'producto__nombre',
                                                                           'pvp_actual').order_by().annotate(
-                    Sum('cantidadp')).filter(estado=1)
-                for p in query:
-                    totalp = p['pvp_actual'] * p['cantidadp__sum']
-                    data.append([
-                        p['venta__fecha_venta'].strftime("%d/%m/%Y"),
-                        p['producto__nombre'],
-                        'Producto',
-                        int(p['cantidadp__sum']),
-                        format(p['pvp_actual'], '.2f'),
-                        format((totalp * 100) / (100 + empresa.iva), '.2f'),
-                        format(float(totalp) * iva, '.2f'),
-                        format(totalp, '.2f')
-                    ])
-                    query2 = Detalle_venta.objects.exclude(cantidads=0).values('venta__fecha_venta', 'servicio__nombre',
-                                                                               'pvp_actual_s').annotate(
-                        Sum('cantidads')).filter(estado=1)
-                    for q in query2:
-                        totals = q['pvp_actual_s'] * q['cantidads__sum']
-                        data.append([
-                            q['venta__fecha_venta'].strftime("%d/%m/%Y"),
-                            q['servicio__nombre'],
-                            'Servicio',
-                            int(q['cantidads__sum']),
-                            format(q['pvp_actual_s'], '.2f'),
-                            format((totals * 100) / (100 + empresa.iva), '.2f'),
-                            format(float(totals) * iva, '.2f'),
-                            format(totals, '.2f')
-                        ])
+                    Sum('cantidadp')).filter(venta__estado=1)
+                query2 = Detalle_venta.objects.exclude(cantidads=0).values('venta__fecha_venta', 'servicio__nombre',
+                                                                           'pvp_actual_s').annotate(
+                    Sum('cantidads')).filter(venta__estado=1)
             else:
                 query = Detalle_venta.objects.exclude(cantidadp=0).values('venta__fecha_venta', 'producto__nombre',
                                                                           'pvp_actual') \
                     .filter(venta__fecha_venta__range=[start_date, end_date], estado=1).order_by().annotate(
                     Sum('cantidadp'))
-                for p in query:
-                    totalp = p['pvp_actual'] * p['cantidadp__sum']
-                    data.append([
-                        p['venta__fecha_venta'].strftime("%d/%m/%Y"),
-                        p['producto__nombre'],
-                        'Producto',
-                        int(p['cantidadp__sum']),
-                        format(p['pvp_actual'], '.2f'),
-                        format((totalp * 100) / (100 + empresa.iva), '.2f'),
-                        format(float(totalp) * iva, '.2f'),
-                        format(totalp, '.2f')
-                    ])
-                    query2 = Detalle_venta.objects.exclude(cantidads=0).values('venta__fecha_venta', 'servicio__nombre',
+                query2 = Detalle_venta.objects.exclude(cantidads=0).values('venta__fecha_venta', 'servicio__nombre',
                                                                                'pvp_actual_s') \
                         .filter(venta__fecha_venta__range=[start_date, end_date], estado=1).annotate(Sum('cantidads'))
-                    for q in query2:
-                        totals = q['pvp_actual_s'] * q['cantidads__sum']
-                        data.append([
-                            q['venta__fecha_venta'].strftime("%d/%m/%Y"),
-                            q['servicio__nombre'],
-                            'Servicio',
-                            int(q['cantidads__sum']),
-                            format(q['pvp_actual_s'], '.2f'),
-                            format((totals * 100) / (100 + empresa.iva), '.2f'),
-                            format(float(totals) * iva, '.2f'),
-                            format(totals, '.2f')
-                        ])
+            for p in query:
+                totalp = p['pvp_actual'] * p['cantidadp__sum']
+                total_sin_iva = float((totalp * 100) / (100 + empresa.iva))
+                data.append([
+                    p['venta__fecha_venta'].strftime("%d/%m/%Y"),
+                    p['producto__nombre'],
+                    'Producto',
+                    int(p['cantidadp__sum']),
+                    format(p['pvp_actual'], '.2f'),
+                    format(total_sin_iva, '.2f'),
+                    format(total_sin_iva * iva, '.2f'),
+                    format(totalp, '.2f')
+                ])
+
+                for q in query2:
+                    totals = q['pvp_actual_s'] * q['cantidads__sum']
+                    total_sin_iva_s = float((totals * 100) / (100 + empresa.iva))
+                    data.append([
+                        q['venta__fecha_venta'].strftime("%d/%m/%Y"),
+                        q['servicio__nombre'],
+                        'Servicio',
+                        int(q['cantidads__sum']),
+                        format(q['pvp_actual_s'], '.2f'),
+                        format(total_sin_iva_s, '.2f'),
+                        format(total_sin_iva_s * float(iva), '.2f'),
+                        format(totals, '.2f')
+                    ])
     except:
         pass
     return JsonResponse(data, safe=False)
@@ -702,30 +659,21 @@ def data_report_total(request):
             query = Venta.objects.values('fecha_venta', 'cliente__nombres', 'cliente__apellidos', 'empleado__first_name'
                                          , 'empleado__last_name').annotate(Sum('subtotal')). \
                 annotate(Sum('iva')).annotate(Sum('total')).filter(estado=1)
-            for p in query:
-                data.append([
-                    p['fecha_venta'].strftime("%d/%m/%Y"),
-                    p['cliente__nombres'] + " " + p['cliente__apellidos'],
-                    p['empleado__first_name'] + " " + p['empleado__last_name'],
-                    format(p['subtotal__sum'], '.2f'),
-                    format(p['iva__sum'], '.2f'),
-                    format(p['total__sum'], '.2f')
-                ])
         else:
             query = Venta.objects.values('fecha_venta', 'cliente__nombres', 'cliente__apellidos',
                                          'empleado__first_name',
                                          'empleado__last_name').filter(
                 fecha_venta__range=[start_date, end_date], estado=1).annotate(Sum('subtotal')). \
                 annotate(Sum('iva')).annotate(Sum('total'))
-            for p in query:
-                data.append([
-                    p['fecha_venta'].strftime("%d/%m/%Y"),
-                    p['cliente__nombres'] + " " + p['cliente__apellidos'],
-                    p['empleado__first_name'] + " " + p['empleado__last_name'],
-                    format(p['subtotal__sum'], '.2f'),
-                    format(p['iva__sum'], '.2f'),
-                    format(p['total__sum'], '.2f')
-                ])
+        for p in query:
+            data.append([
+                p['fecha_venta'].strftime("%d/%m/%Y"),
+                p['cliente__nombres'] + " " + p['cliente__apellidos'],
+                p['empleado__first_name'] + " " + p['empleado__last_name'],
+                format(p['subtotal__sum'], '.2f'),
+                format(p['iva__sum'], '.2f'),
+                format(p['total__sum'], '.2f')
+            ])
     except:
         pass
     return JsonResponse(data, safe=False)
