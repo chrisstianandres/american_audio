@@ -340,17 +340,18 @@ def estado(request):
                 dev.fecha = datetime.now()
                 dev.save()
                 for i in Detalle_venta.objects.filter(venta_id=id):
-                    ch = Producto.objects.get(pk=i.producto.pk)
-                    ch.stock = int(ch.stock) + int(i.cantidadp)
-                    ch.save()
-                    print(id)
-                    for a in Inventario.objects.filter(venta_id=id):
-                        print(a)
-                        a.estado = 1
-                        a.select = 0
-                        a.venta_id = None
-                        a.save()
-                es.save()
+                    if i.producto==None:
+                        es.save()
+                    else:
+                        ch = Producto.objects.get(id=i.producto.id)
+                        ch.stock = int(ch.stock) + int(i.cantidadp)
+                        ch.save()
+                        for a in Inventario.objects.filter(venta_id=id):
+                            a.estado = 1
+                            a.select = 0
+                            a.venta_id = None
+                            a.save()
+                            es.save()
         else:
             data['error'] = 'Ha ocurrido un error'
     except Exception as e:
@@ -420,14 +421,14 @@ def data_tarjets():
     year = datetime.now().year
     ventas = Venta.objects.filter(fecha_venta__year=year, estado=1).aggregate(r=Coalesce(Count('id'), 0)).get('r')
     compras = Compra.objects.filter(fecha_compra__year=year, estado=1).aggregate(r=Coalesce(Count('id'), 0)).get('r')
-    inventario = Inventario.objects.filter(compra__fecha_compra__year=year, estado=1).aggregate(r=Coalesce(Count('id'), 0)).get('r')
+    inventario = Inventario.objects.filter(compra__fecha_compra__year=year, estado=1).aggregate(
+        r=Coalesce(Count('id'), 0)).get('r')
     data = {
         'ventas': int(ventas),
         'compras': int(compras),
         'inventario': int(inventario),
     }
     return data
-
 
 
 def dataChart2():
@@ -567,20 +568,19 @@ def data_report(request):
             else:
                 query = Detalle_venta.objects.exclude(cantidads=0).values('venta__fecha_venta', 'servicio__nombre',
                                                                           'pvp_actual_s') \
-                    .filter(venta__fecha_venta__range=[start_date, end_date], venta__estado=1).annotate(Sum('cantidads'))
+                    .filter(venta__fecha_venta__range=[start_date, end_date], venta__estado=1).annotate(
+                    Sum('cantidads'))
             for p in query:
-                total = p['pvp_actual_s'] * p['cantidads__sum']
-                total_sin_iva = float((total * 100) / (100 + empresa.iva))
-                print(p['servicio__nombre'])
+                total = float(p['pvp_actual_s'] * p['cantidads__sum'])
                 data.append([
                     p['venta__fecha_venta'].strftime("%d/%m/%Y"),
                     p['servicio__nombre'],
                     'Servicio',
                     int(p['cantidads__sum']),
                     format(p['pvp_actual_s'], '.2f'),
-                    format(total_sin_iva, '.2f'),
-                    format(total_sin_iva * iva, '.2f'),
-                    format(total, '.2f')
+                    format(total, '.2f'),
+                    format(total * iva, '.2f'),
+                    format(total * (1 + iva), '.2f')
                 ])
         else:
             if start_date == '' and end_date == '':
@@ -593,11 +593,12 @@ def data_report(request):
             else:
                 query = Detalle_venta.objects.exclude(cantidadp=0).values('venta__fecha_venta', 'producto__nombre',
                                                                           'pvp_actual') \
-                    .filter(venta__fecha_venta__range=[start_date, end_date], estado=1).order_by().annotate(
+                    .filter(venta__fecha_venta__range=[start_date, end_date], venta__estado=1).order_by().annotate(
                     Sum('cantidadp'))
                 query2 = Detalle_venta.objects.exclude(cantidads=0).values('venta__fecha_venta', 'servicio__nombre',
-                                                                               'pvp_actual_s') \
-                        .filter(venta__fecha_venta__range=[start_date, end_date], estado=1).annotate(Sum('cantidads'))
+                                                                           'pvp_actual_s') \
+                    .filter(venta__fecha_venta__range=[start_date, end_date], venta__estado=1).annotate(
+                    Sum('cantidads'))
             for p in query:
                 totalp = p['pvp_actual'] * p['cantidadp__sum']
                 total_sin_iva = float((totalp * 100) / (100 + empresa.iva))
@@ -612,19 +613,18 @@ def data_report(request):
                     format(totalp, '.2f')
                 ])
 
-                for q in query2:
-                    totals = q['pvp_actual_s'] * q['cantidads__sum']
-                    total_sin_iva_s = float((totals * 100) / (100 + empresa.iva))
-                    data.append([
-                        q['venta__fecha_venta'].strftime("%d/%m/%Y"),
-                        q['servicio__nombre'],
-                        'Servicio',
-                        int(q['cantidads__sum']),
-                        format(q['pvp_actual_s'], '.2f'),
-                        format(total_sin_iva_s, '.2f'),
-                        format(total_sin_iva_s * float(iva), '.2f'),
-                        format(totals, '.2f')
-                    ])
+            for q in query2:
+                totals = float(q['pvp_actual_s'] * q['cantidads__sum'])
+                data.append([
+                    q['venta__fecha_venta'].strftime("%d/%m/%Y"),
+                    q['servicio__nombre'],
+                    'Servicio',
+                    int(q['cantidads__sum']),
+                    format(q['pvp_actual_s'], '.2f'),
+                    format(totals, '.2f'),
+                    format(totals * iva, '.2f'),
+                    format(totals * (1 + iva), '.2f')
+                ])
     except:
         pass
     return JsonResponse(data, safe=False)
@@ -651,6 +651,9 @@ class report(ListView):
 
 @csrf_exempt
 def data_report_total(request):
+    x = Venta.objects.get(id=35)
+    x.iva = float(1.80)
+    x.save()
     data = []
     start_date = request.POST.get('start_date', '')
     end_date = request.POST.get('end_date', '')
@@ -671,7 +674,7 @@ def data_report_total(request):
                 p['cliente__nombres'] + " " + p['cliente__apellidos'],
                 p['empleado__first_name'] + " " + p['empleado__last_name'],
                 format(p['subtotal__sum'], '.2f'),
-                format(p['iva__sum'], '.2f'),
+                format((p['iva__sum']), '.2f'),
                 format(p['total__sum'], '.2f')
             ])
     except:
