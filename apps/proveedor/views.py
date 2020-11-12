@@ -60,7 +60,7 @@ def crear(request):
                     elif Cliente.objects.filter(cedula=f.data['numero_documento']):
                         data['error'] = 'Numero de Documento ya exitente en los Clientes'
                         data['form'] = f
-                    elif verificar(f.data['cedula']):
+                    elif verificar(f.data['numero_documento']):
                         f.save()
                         return HttpResponseRedirect('/proveedor/lista')
                     else:
@@ -74,7 +74,6 @@ def crear(request):
                         data['error'] = 'Numero de Cedula no valido para Ecuador'
                         data['form'] = f
             else:
-
                 data['form'] = f
             return render(request, 'front-end/proveedor/proveedor_form.html', data)
 
@@ -159,9 +158,9 @@ def editar(request, id):
         form = ProveedorForm(request.POST, instance=proveedor)
         if form.is_valid():
             form.save()
+            return HttpResponseRedirect('/proveedor/lista')
         else:
             data['form'] = form
-        return HttpResponseRedirect('/proveedor/lista')
     return render(request, 'front-end/proveedor/proveedor_form.html', data)
 
 

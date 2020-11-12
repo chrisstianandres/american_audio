@@ -13,6 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 
 # -----------------------------------------------PAGINA PRINCIPAL-----------------------------------------------------#
+from apps.empleado.models import Empleado
 from apps.empresa.models import Empresa
 
 
@@ -49,13 +50,17 @@ def connect(request):
     if request.method == 'POST' or None:
         username = request.POST['username']
         password = request.POST['password']
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            login(request, user)
-            data['resp'] = True
+        check = Empleado.objects.get(username=username)
+        if check.estado == 0:
+            data['error'] = '<strong>Usuario Inactivo </strong>'
         else:
-            data['error'] = '<strong>Usuario no valido </strong><br>' \
-                            'Verifica las credenciales de acceso y vuelve a intentarlo.'
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                data['resp'] = True
+            else:
+                data['error'] = '<strong>Usuario no valido </strong><br>' \
+                                'Verifica las credenciales de acceso y vuelve a intentarlo.'
     else:
         data['error'] = 'Metodo Request no es Valido.'
     return HttpResponse(json.dumps(data), content_type="application/json")

@@ -10,6 +10,14 @@ $(document).ready(function () {
         maxboostedstep: 10,
         prefix: '$'
     });
+    $('.select2').select2({
+        "language": {
+            "noResults": function () {
+                return "Sin resultados";
+            }
+        },
+        allowClear: true
+    });
     $.validator.setDefaults({
         errorClass: 'invalid-feedback',
 
@@ -78,11 +86,12 @@ $(document).ready(function () {
     $('input[name="p_compra"]').on('change', function () {
         indice_ganancia();
     });
+
     function indice_ganancia() {
         var indice = $('#indice').val();
         var pc = $('input[name="p_compra"]').val();
         var iva = $('#iva').val();
-        var tind = parseFloat(pc * (1+ (indice/100)) * (1 + (iva/100))).toFixed(2);
+        var tind = parseFloat(pc * (1 + (indice / 100)) * (1 + (iva / 100))).toFixed(2);
         $('input[name="pvp"]').val(tind);
     }
 

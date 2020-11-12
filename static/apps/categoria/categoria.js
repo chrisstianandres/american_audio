@@ -38,7 +38,8 @@ $(document).ready(function () {
             nombre: {
                 required: "Porfavor ingresa el nombre de la categoria",
                 minlength: "Debe ingresar al menos 3 letras",
-                lettersonly: "Debe ingresar unicamente letras y espacios"
+                lettersonly: "Debe ingresar unicamente letras y espacios",
+                maxlength: "La descripcion debe tener maximo 50 caracteres",
             },
             descripcion: {
                 required: "Porfavor ingresa una descripcion",

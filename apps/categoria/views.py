@@ -50,9 +50,9 @@ def crear(request):
         f = CategoriaForm(request.POST)
         if f.is_valid():
             f.save()
+            return HttpResponseRedirect('/categoria/lista')
         else:
             data['form'] = f
-        return HttpResponseRedirect('/categoria/lista')
     return render(request, 'front-end/categoria/categoria_form.html', data)
 
 
@@ -70,9 +70,9 @@ def editar(request, id):
         form = CategoriaForm(request.POST, instance=categoria)
         if form.is_valid():
             form.save()
+            return redirect('/categoria/lista')
         else:
             data['form'] = form
-        return redirect('/categoria/lista')
     return render(request, 'front-end/categoria/categoria_form.html', data)
 
 

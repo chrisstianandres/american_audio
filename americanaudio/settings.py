@@ -36,8 +36,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.apps.AppsConfig',
-    'django-backup',
-    'dbbackup',
 
     # sistema
 

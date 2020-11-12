@@ -11,6 +11,7 @@ toDataURL('/media/logo_don_chuta.png').then(dataUrl => {
     logotipo = dataUrl;
 });
 $(function () {
+    $('body').addClass('sb-sidenav-toggled');
     var datatable = $("#datatable").DataTable({
         responsive: true,
         language: {
@@ -48,7 +49,7 @@ $(function () {
                 pageSize: 'A4', //A3 , A5 , A6 , legal , letter
                 download: 'open',
                 exportOptions: {
-                    columns: [0, 1, 2, 3, 4, 5, 6],
+                    columns: [0, 1, 2, 3, 4, 5, 6, 7],
                     search: 'applied',
                     order: 'applied'
                 },
@@ -117,7 +118,7 @@ $(function () {
                         return 4;
                     };
                     doc.content[0].layout = objLayout;
-                    doc.content[1].table.widths = [35, 180, '*', 90, 70, 180, 70];
+                    doc.content[1].table.widths = [150, '*', 90, 70, 180, 70, 70];
                     doc.styles.tableBodyEven.alignment = 'center';
                     doc.styles.tableBodyOdd.alignment = 'center';
                 }

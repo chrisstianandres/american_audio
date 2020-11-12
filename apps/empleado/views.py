@@ -246,11 +246,11 @@ def profile(request):
         form = EmpleadoForm(instance=empleado)
         data['form'] = form
     else:
-        form = EmpleadoForm(request.POST, instance=empleado)
+        form = EmpleadoForm(request.POST, request.FILES, instance=empleado)
         if form.is_valid():
             form.save()
+            return HttpResponseRedirect('/empleado/profile')
         else:
             data['form'] = form
-        return HttpResponseRedirect('/empleado/profile')
     return render(request, 'front-end/profile.html', data)
         # return render(request, 'front-end/profile.html', data)

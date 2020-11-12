@@ -28,6 +28,7 @@ class Cliente(models.Model):
     def toJSON(self):
         item = model_to_dict(self)
         item['full_name'] = self.get_full_name()
+        item['fecha'] = self.fecha.strftime('%d/%m/%Y')
         return item
 
     class Meta:

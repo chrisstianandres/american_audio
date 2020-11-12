@@ -22,6 +22,8 @@ class ProductoForm(forms.ModelForm):
                 'class': 'form-control select2'}
             self.fields['presentacion'].widget.attrs = {
                 'class': 'form-control select2'}
+            self.fields['instalacion'].widget.attrs = {
+                'class': 'form-control'}
             self.fields['p_compra'].widget.attrs = {
                 'class': 'form-control form-control-sm input-sm'}
             self.fields['pvp'].widget.attrs = {
@@ -35,6 +37,7 @@ class ProductoForm(forms.ModelForm):
                   'descripcion',
                   'categoria',
                   'presentacion',
+                  'instalacion',
                   'p_compra',
                   'pvp',
                   ]

@@ -14,6 +14,7 @@ from apps.backEnd import nombre_empresa
 from apps.compra.forms import CompraForm, Detalle_CompraForm
 from apps.compra.models import Compra, Detalle_compra
 from apps.empresa.models import Empresa
+from apps.inventario.models import Inventario
 from apps.producto.models import Producto
 from datetime import date
 import os
@@ -117,22 +118,23 @@ def crear(request):
                     dv.compra_id = c.id
                     dv.producto_id = i['id']
                     dv.cantidad = int(i['cantidad'])
-                    dv.subtotal = int(i['subtotal'])
+                    dv.subtotal = float(i['subtotal'])
                     x = Producto.objects.get(pk=i['id'])
                     x.stock = x.stock + int(i['cantidad'])
                     dv.p_compra_actual = float(x.p_compra)
                     x.save()
                     dv.save()
                     productos = []
+                    pr = []
                     for p in range(0, i['cantidad']):
                         item = c.toJSON()
                         item['producto'] = x.toJSON()
                         item['serie'] = 0
                         item['fecha_salida'] = ''
                         item['estado'] = 1
-                        productos.append(item)
+                        pr.append(item)
+                    data['productos'] = pr
                     data['id'] = c.id
-                    data['productos'] = productos
                     data['resp'] = True
         else:
             data['resp'] = False
@@ -245,21 +247,19 @@ def estado(request):
         id = request.POST['id']
         if id:
             with transaction.atomic():
-                es = Compra.objects.get(id=id)
+                es = Compra.objects.get(pk=id)
                 es.estado = 0
-                for i in Detalle_compra.objects.filter(compra_id=id):
-                    ch = Producto.objects.get(pk=i.producto.pk)
-                    if ch.stock == 0:
+                for i in Inventario.objects.filter(compra_id=id):
+                    ch = Producto.objects.get(id=i.producto.id)
+                    if i.venta != None:
                         data['error'] = 'No se puede devolver esta compra porque los productos ya fueron vendidos'
                         data['content'] = 'Prueba con otra venta'
                     else:
-                        if ch.stock < i.cantidad:
-                            data['error'] = 'No se puede devolver esta compra porque los productos ya fueron vendidos'
-                            data['content'] = 'Prueba con otra venta'
-                        else:
-                            ch.stock = int(ch.stock) - int(i.cantidad)
-                            es.save()
-                            ch.save()
+                        for d in Detalle_compra.objects.filter(compra_id=id):
+                            ch.stock = int(ch.stock) - int(d.cantidad)
+                        i.delete()
+                        es.save()
+                        ch.save()
         else:
             data['error'] = 'Ha ocurrido un error'
     except Exception as e:
@@ -338,7 +338,7 @@ class printpdf(View):
                 item['producto'] = i.producto.toJSON()
                 item['pvp'] = format(((i.p_compra_actual * 100) / (iva_emp.iva + 100)), '.2f')
                 item['cantidad'] = i.cantidad
-                item['subtotal'] = i.subtotal
+                item['subtotal'] = format(i.subtotal, '.2f')
                 data.append(item)
         except:
             pass

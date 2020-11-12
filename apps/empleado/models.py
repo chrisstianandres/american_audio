@@ -19,7 +19,7 @@ ESTADO = (
 
 class Empleado(AbstractUser):
     cargo = models.ForeignKey(Cargo, on_delete=models.CASCADE, null=True, blank=True)
-    avatar = models.ImageField(upload_to='empleado/%Y/%m/%d')  # )
+    avatar = models.ImageField(upload_to='empleado/%Y/%m/%d', default='empleado/admin.png')  # )
     cedula = models.CharField(max_length=10, unique=True)
     telefono = models.CharField(max_length=10, unique=True)
     direccion = models.CharField(max_length=500, blank=True, null=True)

@@ -292,9 +292,9 @@ $(function () {
         ],
         createdRow: function (row, data, dataIndex) {
             if (data[5] === 'FINALIZADA') {
-                $('td', row).eq(5).find('span').addClass('badge bg-success').attr("style", "color: white");;
+                $('td', row).eq(5).find('span').addClass('badge bg-success').attr("style", "color: white");
             } else if (data[5] === 'DEVUELTA') {
-                $('td', row).eq(5).find('span').addClass('badge bg-important').attr("style", "color: white");;
+                $('td', row).eq(5).find('span').addClass('badge bg-danger').attr("style", "color: white");
                 $('td', row).eq(6).find('a[rel="devolver"]').hide();
                 $('td', row).eq(6).find('a[rel="pdf"]').hide();
             }
@@ -305,7 +305,7 @@ $(function () {
         $('.tooltip').remove();
         var tr = datatable.cell($(this).closest('td, li')).index();
         var data = datatable.row(tr.row).data();
-        var parametros = {'id': data['3']};
+        var parametros = {'id': data['4']};
         save_estado('Alerta',
             '/compra/estado', 'Esta seguro que desea devolver esta compra?', parametros,
             function () {
