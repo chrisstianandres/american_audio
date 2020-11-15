@@ -45,7 +45,9 @@ var inventario = {
                     class: 'text-center',
                     orderable: false,
                     render: function (data, type, row) {
-                        return '<input type="text" name="serie" class="form-control form-control-sm input-sm" autocomplete="off">';
+                        return '<input type="text" name="serie" class="form-control form-control-sm input-sm serie" ' +
+                            'autocomplete="off" maxlength="50" placeholder="Ingrese Maximo 50 Caracteres" ' +
+                            'onkeyup="this.value=this.value.toUpperCase();">';
                     }
                 },
                 {
@@ -85,7 +87,8 @@ $(function () {
         parametros = {'inventario': JSON.stringify(inventario.items)};
         save_with_ajax('Alerta',
             '/inventario/crear', 'Esta seguro que desea registrar estos productos en el inventario?', parametros, function (response) {
-               location.href = '/compra/lista';
+                location.href = '/compra/lista';
             });
     });
+
 });

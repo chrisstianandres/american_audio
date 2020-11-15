@@ -104,6 +104,7 @@ def crear(request):
     if request.method == 'POST':
         datos = json.loads(request.POST['compras'])
         if datos:
+            pr = []
             with transaction.atomic():
                 c = Compra()
                 c.fecha_compra = datos['fecha_compra']
@@ -124,8 +125,6 @@ def crear(request):
                     dv.p_compra_actual = float(x.p_compra)
                     x.save()
                     dv.save()
-                    productos = []
-                    pr = []
                     for p in range(0, i['cantidad']):
                         item = c.toJSON()
                         item['producto'] = x.toJSON()
@@ -133,9 +132,9 @@ def crear(request):
                         item['fecha_salida'] = ''
                         item['estado'] = 1
                         pr.append(item)
-                    data['productos'] = pr
-                    data['id'] = c.id
-                    data['resp'] = True
+                data['productos'] = pr
+                data['id'] = c.id
+                data['resp'] = True
         else:
             data['resp'] = False
             data['error'] = "Datos Incompletos"

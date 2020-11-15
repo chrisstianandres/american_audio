@@ -193,10 +193,17 @@ function datatbles() {
     });
 }
 
+function check(){
+     $.ajax({
+        url: '/inventario/check',
+        type: 'POST',
+        dataSrc: "",
+    });
+}
+
 
 $(function () {
     datatbles();
     cahrtventas();
-
-
+    check();
 });

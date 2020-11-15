@@ -154,6 +154,7 @@ def data_select(request):
     try:
         query = Inventario.objects.values('producto_id', 'producto__nombre').filter(estado=1, select=0).order_by(). \
             annotate(Max('producto__id'))
+        print(Inventario.objects.values('producto_id', 'producto__nombre'))
         data = []
         for p in query:
             result = {
@@ -190,3 +191,25 @@ def remove_select(request):
     except Exception as e:
         data['error'] = str(e)
     return JsonResponse(data)
+
+
+@csrf_exempt
+def check_product(request):
+    data = {}
+    try:
+        producto = Inventario.objects.filter(venta=None)
+        for p in producto:
+            if p.select == 1:
+                c = Inventario.objects.get(pk=p.id)
+                c.select = 0
+                c.save()
+                x = Producto.objects.get(pk=2)
+                x.stock=0
+                x.save()
+                x = Producto.objects.get(pk=3)
+                x.stock = 0
+                x.save()
+
+    except Exception as e:
+        data['error'] = str(e)
+    return JsonResponse(data, safe=True)

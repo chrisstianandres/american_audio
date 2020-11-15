@@ -399,7 +399,7 @@ $(function () {
         reset();
         $('#form').trigger("reset");
     });
-    //buscar produto del select cliente
+    //buscar produto del select producto
     $('#id_producto').select2({
         theme: "classic",
         language: {
