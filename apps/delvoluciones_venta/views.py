@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView
 
+from apps.Mixins import ValidatePermissionRequiredMixin
 from apps.backEnd import nombre_empresa
 from apps.delvoluciones_venta.models import Devolucion
 
@@ -11,9 +12,10 @@ crud = '/devoluciones/crear'
 empresa = nombre_empresa()
 
 
-class lista(ListView):
+class lista(ValidatePermissionRequiredMixin, ListView):
     model = Devolucion
     template_name = 'front-end/devoluciones/devolucion_report_total.html'
+    permission_required = 'view_devoluciones_venta'
 
     def get_queryset(self):
         return Devolucion.objects.none()

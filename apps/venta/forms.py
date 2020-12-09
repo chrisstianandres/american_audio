@@ -1,11 +1,12 @@
 from django import forms
 from datetime import *
-from .models import Venta, Detalle_venta
+from .models import Venta, Detalle_venta, Detalle_venta_servicios
 from tempus_dominus.widgets import DatePicker
 
 from ..cliente.models import Cliente
 from ..inventario.models import Inventario
 from ..producto.models import Producto
+from ..servicio.models import Servicio
 
 
 class VentaForm(forms.ModelForm):
@@ -82,38 +83,34 @@ class Detalle_VentaForm(forms.ModelForm):
                 'data-live-search': "true"
             }
             self.fields["producto"].queryset = Inventario.objects.none()
-            self.fields['servicio'].widget.attrs = {
-                'class': 'form-control select2',
-                'style': 'width: 100%',
-                'data-live-search': "true"
-            }
+
         # habilitar, desabilitar, y mas
 
     class Meta:
         model = Detalle_venta
         fields = [
             'producto',
-            'servicio',
+
         ]
 
 
-# class Detalle_VentaForm_serv(forms.ModelForm):
-#     # constructor
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         for field in self.Meta.fields:
-#             self.fields[field].widget.attrs.update({
-#                 'class': 'form-control'
-#             })
-#             self.fields['producto'].widget.attrs = {
-#                 'class': 'form-control select2',
-#                 'data-live-search': "true"
-#             }
-#             self.fields["producto"].queryset = Producto.objects.filter(stock__gte=1)
-#         # habilitar, desabilitar, y mas
-#
-#     class Meta:
-#         model = Detalle_venta
-#         fields = [
-#             'producto'
-#         ]
+class Detalle_VentaForm_serv(forms.ModelForm):
+    # constructor
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.Meta.fields:
+            self.fields[field].widget.attrs.update({
+                'class': 'form-control'
+            })
+            self.fields['servicio'].widget.attrs = {
+                'class': 'form-control select2',
+                'data-live-search': "true",
+                'style': "width: 100%"
+            }
+        # habilitar, desabilitar, y mas
+
+    class Meta:
+        model = Detalle_venta_servicios
+        fields = [
+            'servicio'
+        ]

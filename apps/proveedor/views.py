@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView
 
+from apps.Mixins import ValidatePermissionRequiredMixin
 from apps.backEnd import nombre_empresa
 from apps.cliente.models import Cliente
 from apps.empleado.models import Empleado
@@ -19,15 +20,22 @@ crud = '/proveedor/crear'
 empresa = nombre_empresa()
 
 
-def proveedor_lista(request):
-    data = {
-        'icono': opc_icono, 'entidad': opc_entidad,
-        'boton': 'Nuevo Proveedor', 'titulo': 'Listado de Proveedores', 'empresa' : empresa,
-        'nuevo': '/proveedor/nuevo',
-    }
-    list = Proveedor.objects.all()
-    data['list'] = list
-    return render(request, "front-end/proveedor/proveedor_list.html", data)
+class lista(ValidatePermissionRequiredMixin, ListView):
+    model = Proveedor
+    template_name = 'front-end/proveedor/proveedor_list.html'
+    permission_required = 'view_proveedor'
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['icono'] = opc_icono
+        data['entidad'] = opc_entidad
+        data['boton'] = 'Nuevo Proveedor'
+        data['titulo'] = 'Listado de Proveedores'
+        data['nuevo'] = '/proveedor/nuevo'
+        data['empresa'] = empresa
+        data['list'] = Proveedor.objects.all()
+        return data
+
 
 
 def nuevo(request):
@@ -40,6 +48,7 @@ def nuevo(request):
     return render(request, 'front-end/proveedor/proveedor_form.html', data)
 
 
+@csrf_exempt
 def crear(request):
     f = ProveedorForm(request.POST)
     data = {
@@ -102,9 +111,11 @@ def crearpro(request):
             f = ProveedorForm(request.POST)
             if int(f.data['documento']) == 0:
                 if Empleado.objects.filter(cedula=f.data['numero_documento']):
-                    data['error'] = 'Numero de Documento ya exitente en los Empleados'
+                    f.add_error("documento", "Numero de Cedula ya exitente en los empelados")
+                    data['error'] = f.errors
                 elif Cliente.objects.filter(cedula=f.data['numero_documento']):
-                    data['error'] = 'Numero de Documento ya exitente en los Clientes'
+                    f.add_error("documento", "Numero de Cedula ya exitente en los Clientes")
+                    data['error'] = f.errors
                 elif verificar(f.data['cedula']):
                     with transaction.atomic():
                         f = ProveedorForm(request.POST)
@@ -114,13 +125,10 @@ def crearpro(request):
                             data['proveedor'] = var.toJSON()
                             return JsonResponse(data)
                         else:
-                            errores = []
-                            for a in f.errors:
-                                errores.append('El campo ' + a + ' esta ya existe <br/>')
-                            data['error'] = errores
+                            data['error'] = f.errors
                 else:
-                    data['error'] = 'Numero de Cedula no valido para Ecuador'
-                    data['form'] = f
+                    f.add_error("documento", "Numero de Cedula No valido para Ecuador")
+                    data['error'] = f.errors
             else:
                 if verificar(f.data['numero_documento']):
                     with transaction.atomic():
@@ -131,12 +139,11 @@ def crearpro(request):
                             data['proveedor'] = var.toJSON()
                             return JsonResponse(data)
                         else:
-                            errores = []
-                            for a in f.errors:
-                                errores.append('El campo ' + a + ' esta ya existe <br/>')
-                            data['error'] = errores
+                            data['error'] = f.errors
                 else:
-                    data['error'] = 'Numero de Ruc no valido para Ecuador'
+                    f.add_error("documento", "Numero de Cedula No valido para Ecuador")
+                    data['error'] = f.errors
+
     except Exception as e:
         gs = goslate.Goslate()
         data['error'] = gs.translate(str(e), 'es')

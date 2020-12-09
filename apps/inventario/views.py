@@ -8,6 +8,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView
 
+from apps.Mixins import ValidatePermissionRequiredMixin
 from apps.backEnd import nombre_empresa
 from apps.inventario.models import Inventario
 from apps.producto.models import Producto
@@ -18,9 +19,10 @@ crud = '/inventario/crear'
 empresa = nombre_empresa()
 
 
-class lista(ListView):
+class lista(ValidatePermissionRequiredMixin,ListView):
     model = Inventario
     template_name = 'front-end/inventario/inventario_list.html'
+    permission_required = 'view_inventario'
 
     def get_queryset(self):
         return Inventario.objects.none()

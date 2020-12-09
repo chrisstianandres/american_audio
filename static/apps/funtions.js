@@ -1,3 +1,32 @@
+
+function message_error2(obj) {
+    var html = '';
+    if (typeof (obj) === 'object') {
+        html = '<ul style="text-align: left;">';
+        $.each(obj, function (key, value) {
+            html += '<li>' + key + ': ' + value + '</li>';
+        });
+        html += '</ul>';
+    } else {
+        html = '<p>' + obj + '</p>';
+    }
+   $.confirm({
+        theme: 'modern',
+        icon: 'fa fa-times',
+        title: 'Error!',
+        type: 'red',
+        content: obj,
+        draggable: true,
+        buttons: {
+            info: {
+                text: '<i class="fas fa-check"></i> Ok',
+                btnClass: 'btn-blue'
+            },
+        }
+    });
+}
+
+
 function borrar_todo_alert(title, content, callback, callback2) {
     $.confirm({
         title: title,
@@ -283,4 +312,9 @@ function menssaje_error_form(title, content, icon, callback) {
             },
         }
     });
+}
+
+
+function st (srt) {
+console.log(srt);
 }

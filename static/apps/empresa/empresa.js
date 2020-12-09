@@ -13,7 +13,7 @@ $(document).ready(function () {
         boostat: 5,
         maxboostedstep: 10,
         prefix: '%'
-    }).attr('readonly', true);
+    }).attr('disabled', true);
     $('#editar').on("click", editar);
     $('input[name="iva"]').TouchSpin({
         min: 0,
@@ -36,4 +36,5 @@ function editar() {
     $('#id_direccion').attr('readonly', false);
     $('#id_iva').attr('disabled', false);
     $('#id_telefono').attr('readonly', false);
+    $('#id_indice').attr('disabled', false);
 }

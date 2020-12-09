@@ -10,6 +10,7 @@ from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import *
 
+from apps.Mixins import ValidatePermissionRequiredMixin
 from apps.backEnd import nombre_empresa
 from apps.compra.forms import CompraForm, Detalle_CompraForm
 from apps.compra.models import Compra, Detalle_compra
@@ -31,9 +32,10 @@ crud = '/compra/crear'
 empresa = nombre_empresa()
 
 
-class lista(ListView):
+class lista(ValidatePermissionRequiredMixin, ListView):
     model = Compra
     template_name = 'front-end/compra/compra_list.html'
+    permission_required = 'view_compra'
 
     def get_queryset(self):
         return Compra.objects.none()
@@ -396,9 +398,10 @@ def data_report(request):
     return JsonResponse(data, safe=False)
 
 
-class report(ListView):
+class report(ValidatePermissionRequiredMixin, ListView):
     model = Compra
     template_name = 'front-end/compra/compra_report_product.html'
+    permission_required = 'view_compra'
 
     def get_queryset(self):
         return Compra.objects.none()
@@ -447,9 +450,10 @@ def data_report_total(request):
     return JsonResponse(data, safe=False)
 
 
-class report_total(ListView):
+class report_total(ValidatePermissionRequiredMixin, ListView):
     model = Compra
     template_name = 'front-end/compra/compra_report_total.html'
+    permission_required = 'view_compra'
 
     def get_queryset(self):
         return Compra.objects.none()

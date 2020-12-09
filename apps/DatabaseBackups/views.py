@@ -16,6 +16,7 @@ from django.views.generic import ListView, DeleteView, TemplateView
 from americanaudio.settings import BASE_DIR
 # from core.security.mixins import AccessModuleMixin, PermissionModuleMixin
 from apps.DatabaseBackups.models import DatabaseBackups
+from apps.Mixins import ValidatePermissionRequiredMixin
 from apps.backEnd import nombre_empresa, JsonResponse
 
 opc_icono = 'fas fa-database'
@@ -24,7 +25,7 @@ crud = '/database_backup/nuevo'
 empresa = nombre_empresa()
 
 
-class DatabaseBackupsListView(ListView):
+class DatabaseBackupsListView(ValidatePermissionRequiredMixin, ListView):
     model = DatabaseBackups
     template_name = 'front-end/databasebackups/backup_list.html'
     permission_required = 'view_databasebackups'

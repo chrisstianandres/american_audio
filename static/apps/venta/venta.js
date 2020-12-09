@@ -321,7 +321,6 @@ $(function () {
         var parametros;
         ventas.items.fecha_venta = $('input[name="fecha_venta"]').val();
         ventas.items.cliente = $('#id_cliente option:selected').val();
-
         parametros = {'ventas': JSON.stringify(ventas.items)};
         save_with_ajax('Alerta',
             '/venta/crear', 'Esta seguro que desea guardar esta venta?', parametros, function (response) {

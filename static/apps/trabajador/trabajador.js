@@ -117,5 +117,5 @@ $(document).ready(function () {
         });
         $(this).val(changue);
     });
-
+$('.select2').select2();
 });

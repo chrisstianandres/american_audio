@@ -188,7 +188,6 @@ $(function () {
                 function (response) {
                     menssaje_ok('Exito!', 'Exito al guardar este proveedor!', 'far fa-smile-wink', function () {
                         $('#Modal').modal('hide');
-                        console.log(response);
                         var newOption = new Option(response.proveedor['full_name'], response.proveedor['id'], false, true);
                         $('#id_proveedor').append(newOption).trigger('change');
                     });

@@ -36,6 +36,10 @@ class EmpleadoForm(forms.ModelForm):
             self.fields['cargo'].widget.attrs = {
                 'class': 'form-control select2'
             }
+            self.fields['groups'].widget.attrs = {
+                'class': 'form-control select2',
+                'multiple' : 'multiple'
+            }
             # self.fields["fecha_nacimiento"].widget = SelectDateWidget(years=years,
             #                                                         attrs={'class': 'selectpicker'})
         # habilitar, desabilitar, y mas
@@ -52,6 +56,7 @@ class EmpleadoForm(forms.ModelForm):
                   'telefono',
                   'direccion',
                   'cargo',
+                  'groups',
                   'password',
                   ]
         labels = {
@@ -78,6 +83,7 @@ class EmpleadoForm(forms.ModelForm):
             'telefono': forms.TextInput(),
             'direccion': forms.Textarea(),
             'cargo': forms.Select(),
+            'groups': forms.SelectMultiple(),
             'password': forms.PasswordInput(attrs={'class': 'form-control'}, render_value=True)
         }
 

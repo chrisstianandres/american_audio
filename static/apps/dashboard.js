@@ -112,7 +112,6 @@ function cahrtventas() {
        $('#venta_tarjet').html(parseInt(tarjets['data'].ventas)+ '&nbsp;'+'<i class="fas fa-cart-arrow-down"></i>');
        $('#compra_tarjet').html(parseInt(tarjets['data'].compras)+ '&nbsp;'+'<i class="fab fa-shopify"></i>');
        $('#inv_tarjet').html(parseInt(tarjets['data'].inventario)+ '&nbsp;'+'<i class="fab fa-amazon"></i>');
-        console.log(tarjets['data'].ventas)
     });
 }
 

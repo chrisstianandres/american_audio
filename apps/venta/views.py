@@ -10,14 +10,15 @@ from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import *
 
+from apps.Mixins import ValidatePermissionRequiredMixin
 from apps.backEnd import nombre_empresa
 from apps.cliente.forms import ClienteForm
 from apps.compra.models import Compra
 from apps.delvoluciones_venta.models import Devolucion
 from apps.inventario.models import Inventario
 from apps.servicio.models import Servicio
-from apps.venta.forms import VentaForm, Detalle_VentaForm
-from apps.venta.models import Venta, Detalle_venta
+from apps.venta.forms import VentaForm, Detalle_VentaForm, Detalle_VentaForm_serv
+from apps.venta.models import Venta, Detalle_venta, Detalle_venta_servicios
 from apps.empresa.models import Empresa
 from apps.producto.models import Producto
 
@@ -33,9 +34,10 @@ crud = '/venta/crear'
 empresa = nombre_empresa()
 
 
-class lista(ListView):
+class lista(ValidatePermissionRequiredMixin, ListView):
     model = Venta
     template_name = 'front-end/venta/venta_list.html'
+    permission_required = 'view_venta'
 
     def get_queryset(self):
         return Venta.objects.none()
@@ -88,6 +90,7 @@ def nuevo(request):
     if request.method == 'GET':
         data['form'] = VentaForm()
         data['form2'] = Detalle_VentaForm()
+        data['form3'] = Detalle_VentaForm_serv()
         data['formc'] = ClienteForm()
         data['detalle'] = []
     return render(request, 'front-end/venta/venta_form.html', data)
@@ -99,7 +102,6 @@ def crear(request):
     if request.method == 'POST':
         datos = json.loads(request.POST['ventas'])
         if datos:
-            dtp = []
             with transaction.atomic():
                 c = Venta()
                 c.fecha_venta = datos['fecha_venta']
@@ -120,18 +122,21 @@ def crear(request):
                         x.stock = x.stock - int(i['cantidad'])
                         dv.subtotalp = float(i['subtotal'])
                         x.save()
+                        dv.save()
                         inv = Inventario.objects.filter(producto_id=i['producto']['id'], estado=1)[:i['cantidad']]
                         for itr in inv:
-                            x = Inventario.objects.get(pk=itr.id)
-                            x.estado = 0
-                            x.venta_id = c.id
-                            x.save()
+                            w = Inventario.objects.get(pk=itr.id)
+                            w.estado = 0
+                            w.venta_id = c.id
+                            w.save()
                         for s in datos['servicios']:
-                            dv.servicio_id = s['id']
-                            dv.cantidads = int(s['cantidad'])
-                            dv.subtotals = float(s['subtotal'])
-                            dv.pvp_actual_s = float(s['pvp'])
-                            dv.save()
+                            dvs = Detalle_venta_servicios()
+                            dvs.venta_id = c.id
+                            dvs.servicio_id = s['id']
+                            dvs.cantidads = int(s['cantidad'])
+                            dvs.subtotals = float(s['subtotal'])
+                            dvs.pvp_actual_s = float(s['pvp'])
+                            dvs.save()
                         data['id'] = c.id
                         data['resp'] = True
                 elif datos['productos']:
@@ -156,13 +161,13 @@ def crear(request):
                     data['resp'] = True
                 else:
                     for i in datos['servicios']:
-                        dv = Detalle_venta()
-                        dv.venta_id = c.id
-                        dv.servicio_id = i['id']
-                        dv.cantidads = int(i['cantidad'])
-                        dv.subtotals = float(i['subtotal'])
-                        dv.pvp_actual_s = float(i['pvp'])
-                        dv.save()
+                        dvs = Detalle_venta_servicios()
+                        dvs.venta_id = c.id
+                        dvs.servicio_id = s['id']
+                        dvs.cantidads = int(s['cantidad'])
+                        dvs.subtotals = float(s['subtotal'])
+                        dvs.pvp_actual_s = float(s['pvp'])
+                        dvs.save()
                     data['id'] = c.id
                     data['resp'] = True
         else:
@@ -287,15 +292,15 @@ def get_detalle(request):
             result = Detalle_venta.objects.filter(venta_id=id)
             empresa = Empresa.objects.get(pk=1)
             for p in result:
-                if p.producto != None:
-                    data.append({
-                        'producto': p.producto.nombre,
-                        'categoria': p.producto.categoria.nombre,
-                        'presentacion': p.producto.presentacion.nombre,
-                        'cantidad': p.cantidadp,
-                        'pvp': (p.pvp_actual * 100) / (empresa.iva + 100),
-                        'subtotal': p.subtotalp
-                    })
+                data.append({
+                    'producto': p.producto.nombre,
+                    'categoria': p.producto.categoria.nombre,
+                    'presentacion': p.producto.presentacion.nombre,
+                    'cantidad': p.cantidadp,
+                    'pvp': format(((p.pvp_actual * 100) / (empresa.iva + 100)), '.2f'),
+                    # format(((p.pvp_actual_s * 100) / (empresa.iva + 100)), '.2f'),
+                    'subtotal': format(((p.pvp_actual * 100) / (empresa.iva + 100)), '.2f')*p.cantidadp,
+                })
         else:
             data['error'] = 'Ha ocurrido un error'
     except Exception as e:
@@ -310,14 +315,14 @@ def get_detalle_serv(request):
         id = request.POST['id']
         if id:
             data = []
-            result = Detalle_venta.objects.filter(venta_id=id)
+            empresa = Empresa.objects.get(pk=1)
+            result = Detalle_venta_servicios.objects.filter(venta_id=id)
             for p in result:
-                if p.servicio != None:
                     data.append({
                         'servicio': p.servicio.nombre,
                         'cantidad': p.cantidads,
-                        'pvp': (p.pvp_actual_s),
-                        'subtotal': p.subtotals
+                        'pvp': format(((p.pvp_actual_s * 100) / (empresa.iva + 100)), '.2f'),
+                        'subtotal': format(((p.pvp_actual_s * 100) / (empresa.iva + 100)), '.2f')*p.cantidads
                     })
         else:
             data['error'] = 'Ha ocurrido un error'
@@ -496,13 +501,24 @@ class printpdf(View):
             for i in Detalle_venta.objects.filter(venta_id=self.kwargs['pk']):
                 item = i.venta.toJSON()
                 item['producto'] = i.producto.toJSON()
-                item['servicio'] = i.servicio.toJSON()
                 item['pvp'] = format(((i.pvp_actual * 100) / (iva_emp.iva + 100)), '.2f')
-                item['pvp_s'] = format(((i.pvp_actual_s * 100) / (iva_emp.iva + 100)), '.2f')
                 item['cantidadp'] = i.cantidadp
-                item['subtotalp'] = i.subtotalp
+                item['subtotalp'] = format(((i.pvp_actual * 100) / (iva_emp.iva + 100)), '.2f')*i.cantidadp
+                data.append(item)
+        except:
+            pass
+        return data
+
+    def serv(self, *args, **kwargs):
+        data = []
+        try:
+            iva_emp = Empresa.objects.get(pk=1)
+            for i in Detalle_venta_servicios.objects.filter(venta_id=self.kwargs['pk']):
+                item = i.venta.toJSON()
+                item['servicio'] = i.servicio.toJSON()
+                item['pvp_s'] = format(((i.pvp_actual_s * 100) / (iva_emp.iva + 100)), '.2f')
                 item['cantidads'] = i.cantidads
-                item['subtotals'] = i.subtotals
+                item['subtotals'] = format(((i.pvp_actual_s * 100) / (iva_emp.iva + 100)), '.2f')*i.cantidads
                 data.append(item)
         except:
             pass
@@ -514,6 +530,7 @@ class printpdf(View):
             context = {'title': 'Comprobante de Venta',
                        'sale': Venta.objects.get(pk=self.kwargs['pk']),
                        'det_sale': self.pvp_cal(),
+                       'det_serv': self.serv(),
                        'empresa': Empresa.objects.get(id=1),
                        'icon': 'media/logo_don_chuta.png',
                        'inventario': Inventario.objects.filter(venta_id=self.kwargs['pk'])
@@ -630,9 +647,10 @@ def data_report(request):
     return JsonResponse(data, safe=False)
 
 
-class report(ListView):
+class report(ValidatePermissionRequiredMixin, ListView):
     model = Venta
     template_name = 'front-end/venta/venta_report_product.html'
+    permission_required = 'view_venta'
 
     def get_queryset(self):
         return Venta.objects.none()
@@ -682,9 +700,10 @@ def data_report_total(request):
     return JsonResponse(data, safe=False)
 
 
-class report_total(ListView):
+class report_total(ValidatePermissionRequiredMixin, ListView):
     model = Venta
     template_name = 'front-end/venta/venta_report_total.html'
+    permission_required = 'view_venta'
 
     def get_queryset(self):
         return Venta.objects.none()

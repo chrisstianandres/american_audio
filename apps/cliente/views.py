@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import *
 from django.http import HttpResponse, JsonResponse
 
+from apps.Mixins import ValidatePermissionRequiredMixin
 from apps.backEnd import nombre_empresa
 from apps.cliente.forms import ClienteForm
 from apps.cliente.models import Cliente
@@ -22,15 +23,25 @@ crud = '/cliente/crear'
 empresa = nombre_empresa()
 
 
-def cliente_lista(request):
-    data = {
-        'icono': opc_icono, 'entidad': opc_entidad, 'empresa': empresa,
-        'boton': 'Nuevo Cliente', 'titulo': 'Listado de Clientes',
-        'nuevo': '/cliente/nuevo'
-    }
-    list = Cliente.objects.all()
-    data['list'] = list
-    return render(request, "front-end/cliente/cliente_list.html", data)
+class lista(ValidatePermissionRequiredMixin, ListView):
+    model = Cliente
+    template_name = 'front-end/categoria/categoria_list.html'
+    permission_required = 'view_cliente'
+
+    @csrf_exempt
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['icono'] = opc_icono
+        data['entidad'] = opc_entidad
+        data['boton'] = 'Nuevo Cliente'
+        data['titulo'] = 'Listado de Clientes'
+        data['nuevo'] = '/cliente/nuevo'
+        data['empresa'] = empresa
+        data['list'] = Cliente.objects.all()
+        return data
 
 
 @csrf_exempt
@@ -48,7 +59,7 @@ def data(request):
         data['error'] = str(e)
     return JsonResponse(data, safe=False)
 
-
+@csrf_exempt
 def nuevo(request):
     data = {
         'icono': opc_icono, 'entidad': opc_entidad, 'crud': crud, 'empresa': empresa,
@@ -184,9 +195,10 @@ def data_report(request):
     return JsonResponse(data, safe=False)
 
 
-class report(ListView):
+class report(ValidatePermissionRequiredMixin, ListView):
     model = Cliente
     template_name = 'front-end/cliente/cliente_report.html'
+    permission_required = 'view_cliente'
 
     def get_queryset(self):
         return Cliente.objects.none()

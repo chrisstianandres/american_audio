@@ -30,9 +30,7 @@
             <div class="container-fluid">
                 <h1 class="mt-4"><i class="{{ icono }}"></i> {{ entidad }}</h1>
                 {% block content %}
-
                 {% endblock %}
-
             </div>
         </main>
         {% include 'front-end/footer.html' %}
@@ -59,6 +57,17 @@
 {% block extra %}
 {% endblock %}
 {% block javascript %}
+
+
+{% endblock %}
+{% block error %}
+  {% if messages %}
+                     {% for message in messages %}
+                            <script>
+                               message_error2('{{ message }}');
+                            </script>
+                        {% endfor %}
+                {% endif %}
 
 {% endblock %}
 </body>

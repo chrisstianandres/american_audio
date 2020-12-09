@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import *
 
-from apps.Mixins import SuperUserRequiredMixin
+from apps.Mixins import SuperUserRequiredMixin, ValidatePermissionRequiredMixin
 from apps.backEnd import nombre_empresa
 from apps.producto.forms import ProductoForm
 from apps.producto.models import Producto
@@ -15,9 +15,10 @@ crud = '/producto/crear'
 empresa = nombre_empresa()
 
 
-class lista(SuperUserRequiredMixin, ListView):
+class lista(ValidatePermissionRequiredMixin, ListView):
     model = Producto
     template_name = 'front-end/producto/producto_list.html'
+    permission_required = 'view_producto'
 
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)

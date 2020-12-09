@@ -46,12 +46,8 @@ class Detalle_venta(models.Model):
     venta = models.ForeignKey(Venta, on_delete=models.PROTECT)
     producto = models.ForeignKey(Producto, on_delete=models.PROTECT, null=True, blank=True, default=None)
     pvp_actual = models.DecimalField(default=0.00, max_digits=9, decimal_places=2, blank=True, null=True)
-    pvp_actual_s = models.DecimalField(default=0.00, max_digits=9, decimal_places=2, blank=True, null=True)
-    cantidadp = models.IntegerField(default=0)
-    servicio = models.ForeignKey(Servicio, on_delete=models.PROTECT, null=True, blank=True, default=None)
-    cantidads = models.IntegerField(default=0)
     subtotalp = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
-    subtotals = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
+    cantidadp = models.IntegerField(default=0)
 
     def __str__(self):
         return '%s' % (self.venta)
@@ -61,10 +57,32 @@ class Detalle_venta(models.Model):
         item = model_to_dict(self)
         item['venta'] = self.venta.toJSON()
         item['producto'] = self.producto.toJSON()
-        item['servicio'] = self.servicio.toJSON()
         return item
 
     class Meta:
         db_table = 'detalle_venta'
         verbose_name = 'detalle_venta'
         verbose_name_plural = 'detalles_ventas'
+
+
+class Detalle_venta_servicios(models.Model):
+    venta = models.ForeignKey(Venta, on_delete=models.PROTECT)
+    servicio = models.ForeignKey(Servicio, on_delete=models.PROTECT, null=True, blank=True, default=None)
+    pvp_actual_s = models.DecimalField(default=0.00, max_digits=9, decimal_places=2, blank=True, null=True)
+    cantidads = models.IntegerField(default=0)
+    subtotals = models.DecimalField(default=0.00, max_digits=9, decimal_places=2)
+
+    def __str__(self):
+        return '%s' % (self.venta)
+
+    def toJSON(self):
+        empresa = Empresa.objects.get(pk=1)
+        item = model_to_dict(self)
+        item['venta'] = self.venta.toJSON()
+        item['serivicio'] = self.servicio.toJSON()
+        return item
+
+    class Meta:
+        db_table = 'detalle_venta_servicio'
+        verbose_name = 'detalle_venta_servicio'
+        verbose_name_plural = 'detalles_venta_servicios'

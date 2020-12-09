@@ -1,29 +1,59 @@
 $(function () {
+    var action = '';
+    var pk = '';
     var datatable = $("#datatable").DataTable({
         responsive: true,
         autoWidth: false,
+        ajax: {
+            url: window.location.pathname,
+            type: 'POST',
+            data: {'action': 'list'},
+            dataSrc: ""
+        },
+        columns: [
+            {"data": "id"},
+            {"data": "nombre"},
+            {"data": "descripcion"},
+            {"data": "id"}
+        ],
         language:
             {
-              url:  '//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json'
+                url: '//cdn.datatables.net/plug-ins/1.10.15/i18n/Spanish.json'
             },
-       columnDefs: [
+        columnDefs: [
             {
                 targets: [-1],
                 class: 'text-center',
                 width: '10%'
-            }
+            },
+            {
+                targets: [-1],
+                class: 'text-center',
+                orderable: false,
+                render: function (data, type, row) {
+                    var edit = '<a style="color: white" type="button" class="btn btn-success btn-sm" rel="edit" href="/categoria/editar/'+data+'" ' +
+                        'data-toggle="tooltip" title="Editar Datos"><i class="fa fa-user-edit"></i></a>' + ' ';
+                    var del = '<a type="button" class="btn btn-danger btn-sm"  style="color: white" rel="del" ' +
+                        'data-toggle="tooltip" title="Eliminar"><i class="fa fa-trash"></i></a>' + ' ';
+                    return edit + del
+
+                }
+            },
         ]
     });
-    $('#datatable tbody').on('click', 'a[rel="del"]', function () {
-        var tr = datatable.cell($(this).closest('td, li')).index();
-        var data = datatable.row(tr.row).data();
-        var parametros = {'id': data['0']};
-        save_estado('Alerta',
-            '/categoria/eliminar', 'Esta seguro que desea eliminar esta categoria?', parametros,
-            function () {
-                menssaje_ok('Exito!', 'Exito al eliminar la categoria!', 'far fa-smile-wink', function () {
-                    location.reload();
+    $('#datatable tbody')
+        .on('click', 'a[rel="del"]', function () {
+            action = 'delete';
+            var tr = datatable.cell($(this).closest('td, li')).index();
+            var data = datatable.row(tr.row).data();
+            var parametros = {'id': data.id};
+            parametros['action'] = action;
+            save_estado('Alerta',
+                window.location.pathname, 'Esta seguro que desea eliminar esta categoria?', parametros,
+                function () {
+                    menssaje_ok('Exito!', 'Exito al eliminar esta categoria!', 'far fa-smile-wink', function () {
+                        datatable.ajax.reload(null, false)
+                    })
                 })
-            });
-    });
+        });
 });
